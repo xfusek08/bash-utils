@@ -6,7 +6,7 @@
 #
 # Description:
 #     This scripts registers the `fcd` into current shell session.
-#     The `fcd` command changes the current directory to a specified directory or to a directory selected interactively using fzf.
+#     The `fcd` command is a simple way to change the current directory to a directory selected interactively using fzf.
 #
 # Usage:
 #     fcd [OPTIONS] [DIRECTORY]
@@ -81,28 +81,29 @@ fcd() {
     
     # Show help message if -h option is specified
     if [ "$help" == "true" ]; then
-        cat <<EOF
-Usage: fcd [OPTIONS] [DIRECTORY]
+        echo -e "$(cat <<EOF
+\033[1mUsage:\033[0m fcd [OPTIONS] [DIRECTORY]
 
-Changes the current directory to the specified directory or to a directory selected interactively using fzf.
+Changes the current directory to the specified directory or to a directory selected interactively using \033[1;36mfzf\033[0m.
 
-Options:
-    -h        Show this help message
-    -a        Include hidden directories in the search
+\033[1mOptions:\033[0m
+    \033[1m-h\033[0m        Show this help message
+    \033[1m-a\033[0m        Include hidden directories in the search
 
-Directory:
+\033[1mDirectory:\033[0m
     The directory to search for subdirectories in. Default is the current directory.
 
-Examples:
-    fcd ~/projects/myproject
-    fcd -a ~/projects/myproject
+\033[1mExamples:\033[0m
+    fcd \033[33m~/projects/myproject\033[0m
+    fcd -a \033[33m~/projects/myproject\033[0m
 
-Note:
+\033[1mNote:\033[0m
 This script requires the following dependencies:
-    - fzf
+    - \033[1;36mfzf\033[0m
 
 Please make sure to install these dependencies before using the script.
 EOF
+)"
         return 0
     fi
     

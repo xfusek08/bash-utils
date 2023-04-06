@@ -5,11 +5,10 @@
 #     fzcode (Fuzzy Code)
 #
 # Description:
-#     This function allows you to search for code files in a specified directory and open them in Visual Studio Code using fzf for interactive filtering.
-#     By default, the current directory is searched. You can specify a different directory as an argument.
-#     The script uses ripgrep to search for files, fzf for interactive filtering, and code (Visual Studio Code) to open the selected file(s).
-#     You can enable debug mode by passing the -D option. In debug mode, the search results are displayed in fzf without opening them in Visual Studio Code.
-#
+#     The fzcode script searches for source code files in a specified directory using ripgrep.
+#     It then presents the search results to the user in a fuzzy-search interface (fzf).
+#     Once the user selects a line from the search results,
+#     the script opens the corresponding file in the Visual Studio Code editor.#
 # Usage:
 #     fzcode [OPTIONS] [DIRECTORY]
 #
@@ -90,30 +89,34 @@ fzcode() {
     
     # Show help message if -h option is specified
     if [ "$help" == "true" ]; then
-        cat <<EOF
-Usage: fzcode [OPTIONS] [DIRECTORY]
+        echo -e "$(cat <<EOF
+\033[1mUsage:\033[0m fzcode [OPTIONS] [DIRECTORY]
 
-Searches for code files in the specified directory and opens them in the code editor using fzf for interactive filtering.
+The \033[1;32mfzcode\033[0m script searches for source code files in a specified directory using \033[1;34mripgrep\033[0m.
+It then presents the search results to the user in a fuzzy-search interface (\033[1;36mfzf\033[0m).
+Once the user selects a line from the search results,
+the script opens the corresponding file in the \033[1;35mVisual Studio Code\033[0m editor.
 
-Options:
-    -h        Show this help message
-    -D        Enable debug mode
+\033[1mOptions:\033[0m
+    \033[1m-h\033[0m        Show this help message
+    \033[1m-D\033[0m        Enable debug mode
 
-Directory:
+\033[1mDirectory:\033[0m
     The directory to search for code files in. Default is the current directory.
 
-Examples:
-    fzcode ~/projects/myproject
-    fzcode -D ~/projects/myproject
+\033[1mExamples:\033[0m
+    fzcode \033[33m~/projects/myproject\033[0m
+    fzcode -D \033[33m~/projects/myproject\033[0m
 
-Note:
+\033[1mNote:\033[0m
 This script requires the following dependencies:
-    - ripgrep (rg)
-    - fzf
-    - code (Visual Studio Code)
+    - \033[1;34mripgrep\033[0m (rg)
+    - \033[1;36mfzf\033[0m
+    - \033[1;35mVisual Studio Code\033[0m
 
 Please make sure to install these dependencies before using the script.
 EOF
+)"
         return 0
     fi
     
