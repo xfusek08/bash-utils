@@ -28,10 +28,12 @@
 #     This script requires the following dependencies: fzf
 #
 # Author:
-#     Petr Fusek
+#     Petr Fusek: petr.fusek97@gmail.com
 #
 # Thanks to:
-#     Chat GPT for helping me document this script! 🤖
+#     - The developers of `fzf` and `bat` for creating great tools.
+#         - https://github.com/junegunn/fzf
+#     - Chat GPT for helping me document this script! 🤖
 #
 
 unalias fcd 2>/dev/null #remove potential alias

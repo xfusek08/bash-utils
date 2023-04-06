@@ -4,6 +4,8 @@
 BUILD_DIR="$(pwd)/build"
 HOME_DIR="$HOME"
 
+./build.sh
+
 # Copy the build file to the user's home directory
 cp "$BUILD_DIR/.bash_aliases" "$HOME_DIR"
 
