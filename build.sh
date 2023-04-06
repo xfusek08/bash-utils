@@ -1,5 +1,27 @@
 #!/bin/bash
 
+# This is a Bash script that inlines a set of Bash script files into a single file. The script first
+# defines the paths to the source and build folders, which are the folders where the script files are
+# located and where the inlined file will be saved, respectively.
+# Then, it creates the build directory if it doesn't exist and removes the build file if it already exists.
+#
+# The script initializes two arrays: stack and seen stack is used as a LIFO stack to keep track of the
+# order in which the files should be inlined, and seen is used to prevent infinite recursion in case of
+# circular dependencies between the files.
+# The push function is used to push a file onto the stack.
+# It first checks if the file has already been pushed onto the stack by searching the seen array.
+# If the file has not been seen before, it pushes the file onto the stack and marks it as seen.
+# If the file has dependencies, it pushes the dependencies onto the stack after the file itself.
+#
+# The script gets a list of all the files in the source directory and loops through the files, pushing
+# them onto the stack using the push function.
+# Then, it loops through the stack and inlines the files by reading each line of the file and appending
+# it to the build file if it is not a commented line or a source or include line.
+# Finally, the script prints a message for each file that is inlined.
+#
+# This script can be used to simplify the management of a large number of Bash script files by
+# consolidating them into a single file.
+
 # Define the paths to the source and build folders
 SOURCE_DIR="$(pwd)/scripts"
 BUILD_DIR="$(pwd)/build"
