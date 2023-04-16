@@ -11,7 +11,7 @@ img_scale_all() {
     # Check if scaling factor is provided
     if [ -z "$1" ]; then
         echo "Please provide a scaling factor as an argument"
-        exit 1
+        return 1
     fi
 
     # Set the scaling factor
