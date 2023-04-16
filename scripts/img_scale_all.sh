@@ -17,6 +17,10 @@ img_scale_all() {
     # Set the scaling factor
     factor="$1"
 
+    # Create a directory to store the scaled images
+    output_dir="scaled"
+    mkdir -p "$output_dir"
+
     # Loop through all files in the current directory
     for file in *.*; do
         # Extract the filename without the extension
@@ -32,6 +36,6 @@ img_scale_all() {
         width=$(calc_scaled_dims "$(identify -format "%w" "$file")" "$factor")
 
         # Use ImageMagick's convert command to scale the resolution of the image
-        convert -resize "${width}x${height}" "$file" "${filename}_$factor.$extension"
+        convert -resize "${width}x${height}" "$file" "${output_dir}/${filename}_$factor.$extension"
     done
 }
