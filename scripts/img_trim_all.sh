@@ -7,7 +7,7 @@ img_trim_all() {
     fi
 
     # Loop through all files in the current directory
-    for file in *.*; do
+    for file in *.jpg *.jpeg *.png *.gif *.bmp *.webp; do
         if [ -f "$file" ]; then
             filename=$(basename "$file")
             extension="${filename##*.}"

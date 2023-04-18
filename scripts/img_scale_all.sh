@@ -22,7 +22,7 @@ img_scale_all() {
     mkdir -p "$output_dir"
 
     # Loop through all files in the current directory
-    for file in *.*; do
+    for file in *.jpg *.jpeg *.png *.gif *.bmp *.webp; do
         # Extract the filename without the extension
         filename="${file%.*}"
 
