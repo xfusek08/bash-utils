@@ -15,20 +15,20 @@
 img_recount() {
     # Set the starting number for the file names. Defaults to 1 if not provided.
     count=${1:-1}
-
+    
     # Set the output directory for the renamed files. Defaults to "./out/" if not provided.
     output_dir=${2:-./out/}
-
+    
     # If the output directory does not exist, create it. Otherwise, remove all files in the directory.
     if [ ! -d "$output_dir" ]; then
         mkdir "$output_dir"
     else
         rm -rf "$output_dir"/*
     fi
-
+    
     # Enable nullglob to prevent the script from iterating over the *.* pattern if there are no files that match it.
     shopt -s nullglob
-
+    
     # Loop over all files in the current directory that have an extension and rename them.
     for file in *.*; do
         if [ -f "$file" ]; then

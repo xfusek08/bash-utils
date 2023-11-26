@@ -58,7 +58,7 @@ install_vscode() {
                 ;;
         esac
     done
-
+    
     # Show help message if -h option is specified
     if [ "$help" == "true" ]; then
         cat <<EOF
@@ -79,7 +79,7 @@ Notes:
 EOF
         return 0
     fi
-
+    
     # Download the latest stable version of Visual Studio Code
     wget 'https://code.visualstudio.com/sha/download?build=stable&os=linux-deb-x64' -O /tmp/code_latest_amd64.deb
     
