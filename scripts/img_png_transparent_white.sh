@@ -1,5 +1,25 @@
 #!/bin/bash
 
+# Script:
+#     img_png_transparent_white
+#
+# Description:
+#     This script makes the white background transparent in PNG images and organizes the modified files in the "transparent" directory.
+#
+# Usage:
+#     img_png_transparent_white
+#
+# Examples:
+#     img_png_transparent_white    # makes white background transparent in PNG files and stores them in the "transparent" directory
+#
+# Author:
+#     Petr Fusek
+#     petr.fusek97@gmail.com
+#
+# Thanks to:
+#     - Chat GPT for helping me document this script! 🤖
+#
+
 img_png_transparent_white() {
     # Create the "transparent" directory if it doesn't exist
     if [ ! -d "transparent" ]; then

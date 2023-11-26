@@ -1,5 +1,28 @@
 #!/bin/bash
 
+# Script:
+#     img_scale_all
+#
+# Description:
+#     This script scales the resolution of all supported image files in the current directory based on a specified scaling factor.
+#
+# Usage:
+#     img_scale_all SCALING_FACTOR
+#
+# Arguments:
+#     SCALING_FACTOR:   The factor by which to scale the images. Must be a positive number.
+#
+# Examples:
+#     img_scale_all 0.5    # scales all images in the current directory by 50%
+#
+# Author:
+#     Petr Fusek
+#     petr.fusek97@gmail.com
+#
+# Thanks to:
+#     - Chat GPT for helping me document this script! 🤖
+#
+
 img_scale_all() {
     # Define function to calculate scaled image dimensions
     function calc_scaled_dims {

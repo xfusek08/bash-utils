@@ -1,31 +1,31 @@
 #!/bin/bash
 
-#
-# Function: install_vscode
+# Script:
+#     install_vscode
 #
 # Description:
-#   This function downloads and installs the latest stable version of Visual Studio Code for Linux x64.
-#   It uses `wget` to download the .deb package and `dpkg` to install it.
+#     This script provides a function to download and install the latest stable version of Visual Studio Code for Linux x64.
+#     It utilizes `wget` to download the .deb package and `dpkg` to handle the installation.
 #
 # Usage:
-#   install_vscode [-h|--help]
+#     install_vscode [-h|--help]
 #
 # Options:
-#   -h, --help    Display this help message and exit.
+#     -h, --help    Display this help message and exit.
 #
 # Dependencies:
-#   This function requires `wget` and `dpkg` to be installed.
+#     This function requires `wget` and `dpkg` to be installed.
 #
 # Examples:
-#   install_vscode
+#     install_vscode    # downloads and installs the latest stable version of Visual Studio Code
 #
 # Notes:
-#   - This function installs the latest stable version of Visual Studio Code for Linux x64.
-#   - This function requires the following dependencies: wget, dpkg.
-#   - This script has been tested on Ubuntu and should work on other Debian-based distributions as well.
+#     - This function installs the latest stable version of Visual Studio Code for Linux x64.
+#     - This script has been tested on Ubuntu and should work on other Debian-based distributions as well.
 #
 # Author:
-#     Petr Fusek: petr.fusek97@gmail.com
+#     Petr Fusek
+#     petr.fusek97@gmail.com
 #
 # Thanks to:
 #     - Chat GPT for helping me document and code this script! 🤖
