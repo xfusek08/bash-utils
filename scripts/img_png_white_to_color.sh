@@ -26,6 +26,9 @@
 #     - Chat GPT for helping me document this script! 🤖
 #
 
+. ImageMagick.sh
+
+
 img_png_white_to_color() {
     # Create the "colored" directory if it doesn't exist
     if [ ! -d "colored" ]; then

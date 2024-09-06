@@ -23,6 +23,9 @@
 #     - Chat GPT for helping me document this script! 🤖
 #
 
+. ImageMagick.sh
+
+
 img_scale_all() {
     # Define function to calculate scaled image dimensions
     function calc_scaled_dims {

@@ -23,6 +23,9 @@
 # Thanks to:
 #     - Chat GPT for helping me document this script! 🤖
 #
+
+. ImageMagick.sh
+
 img_jpg_to_png() {
     # Create the "png" directory if it doesn't exist
     if [ ! -d "png" ]; then

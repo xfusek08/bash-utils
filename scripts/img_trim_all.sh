@@ -20,6 +20,9 @@
 #     - Chat GPT for helping me document this script! 🤖
 #
 
+. ImageMagick.sh
+
+
 img_trim_all() {
     # Create the 'trimmed' directory if it doesn't exist
     if [ ! -d "trimmed" ]; then
