@@ -11,8 +11,11 @@ SCRIPTS_DIR="$(pwd)/home-scripts"
 # Copy the .bash_aliases file to the user's home directory
 cp "$BUILD_DIR/.bash_aliases" "$HOME_DIR"
 
-# Copy all files from the home-scripts directory to the user's home directory
-cp -r "$SCRIPTS_DIR/." "$HOME_DIR"
+# Copy all files from the home-scripts directory to the user's home directory and chmod +x them
+for file in "$SCRIPTS_DIR"/*; do
+    cp "$file" "$HOME_DIR"
+    chmod +x "$HOME_DIR/$(basename "$file")"
+done
 
 # Confirm the installation is complete
 echo "Installation complete"
