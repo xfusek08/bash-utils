@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# Redirect all output (stdout) and errors (stderr) to a log file in the home directory
+log_file="$HOME/fzdirmod_error.log"
+
+# Clean up the log file if it already exists
+if [[ -f "$log_file" ]]; then
+    rm "$log_file"
+fi
+
+exec > "$log_file" 2>&1
+
 # Function to open a new terminal, run a command, and return the result
 fzdirmod() {
     # Get the directory name from argument or default to the current directory
@@ -15,8 +25,10 @@ fzdirmod() {
     # Open file descriptor 3 for reading/writing to the named pipe
     exec 3<>"$pipe"
 
-    # Display the directory in the current terminal (for user information)
-    echo "Opening directory: $dir_name" > /dev/tty
+    # Display the directory in the current terminal (for user information) if a terminal exists
+    if [[ -t 1 ]]; then
+        echo "Opening directory: $dir_name" > /dev/tty
+    fi
 
     # Build the command to run in the new terminal
     local command="
