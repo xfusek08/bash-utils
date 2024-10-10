@@ -1,20 +1,24 @@
 #!/bin/bash
 
-# Script:
+#
+# Alias:
 #     img_jpg_to_png
 #
 # Description:
-#     This script converts JPG images to PNG format, with an option to make either black or white color transparent.
+#     This alias converts JPG images to PNG format, with optional transparency for black or white colors.
 #
 # Usage:
 #     img_jpg_to_png [OPTIONS]
 #
 # Options:
-#     -b      Make black color transparent. Default is white.
+#     -b      Make black color transparent.
+#     -w      Make white color transparent.
+#     No option results in no transparency.
 #
 # Examples:
-#     img_jpg_to_png        # converts JPG to PNG with white color transparent
+#     img_jpg_to_png        # converts JPG to PNG with no transparency
 #     img_jpg_to_png -b     # converts JPG to PNG with black color transparent
+#     img_jpg_to_png -w     # converts JPG to PNG with white color transparent
 #
 # Author:
 #     Petr Fusek
@@ -26,24 +30,5 @@
 
 . ImageMagick.sh
 
-img_jpg_to_png() {
-    # Create the "png" directory if it doesn't exist
-    if [ ! -d "png" ]; then
-        mkdir png
-    fi
-    
-    # Loop through all JPG files in the current directory
-    for file in *.jpg; do
-        # Extract the filename without the extension
-        filename="${file%.*}"
-        
-        # Check if -b option is defined
-        if [ "$1" = "-b" ]; then
-            # Make black color transparent
-            convert "$file" -fuzz 5% -transparent black "png/${filename}.png"
-        else
-            # Make white color transparent
-            convert "$file" -fuzz 5% -transparent white "png/${filename}.png"
-        fi
-    done
-}
+unalias img_jpg_to_png 2>/dev/null  # Remove any existing alias
+alias img_jpg_to_png='img_convert jpg png'

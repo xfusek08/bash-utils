@@ -33,4 +33,5 @@
 #     - Chat GPT for helping me document this script! 🤖
 #
 
+unalias ls 2>/dev/null  # Remove any existing alias
 alias ls='exa --icons --color=auto --group-directories-first'

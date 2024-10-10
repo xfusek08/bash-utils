@@ -36,6 +36,14 @@ rm -f "$BUILD_DIR/.bash_aliases"
 stack=()
 seen=()
 
+# Debug flag
+DEBUG=false
+
+# Check for the debug flag argument
+if [[ "$1" == "--debug" ]]; then
+    DEBUG=true
+fi
+
 # Push a file onto the stack
 function push {
     # echo "trying to push $1 | ${seen[@]}"
@@ -65,12 +73,25 @@ done
 
 # Loop through the stack and inline the files
 for file in "${stack[@]}"; do
-    echo "Inlining $file"
+    # Initialize a counter for the number of inlined lines
+    line_count=0
     
-    while IFS= read -r line; do
-        # Omit commented lines and source/include lines
-        if [[ $line != \#* ]] && [[ $line != .* ]] && [[ $line != source* ]]; then
+    # Append a newline at the end of the file to ensure the last line is read
+    while IFS= read -r line || [[ -n $line ]]; do
+        # Omit commented lines, source/include lines, and empty lines
+        if [[ ! $line =~ ^[[:space:]]*# ]] && [[ $line != .* ]] && [[ $line != source* ]] && [[ -n ${line//[[:space:]]/} ]]; then
             echo "$line" >> "$BUILD_DIR/.bash_aliases"
+            ((line_count++))
+            if $DEBUG; then
+                echo "🟢 Accepted: $line"
+            fi
+        else
+            if $DEBUG; then
+                echo "🔴 Rejected: $line"
+            fi
         fi
     done < "$SOURCE_DIR/$file"
+    
+    # Log inlined lines for this file in one line
+    printf "Inlined %4d lines from %s\n" "$line_count" "$file"
 done

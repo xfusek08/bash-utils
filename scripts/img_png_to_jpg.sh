@@ -1,16 +1,17 @@
 #!/bin/bash
 
-# Script:
+#
+# Alias:
 #     img_png_to_jpg
 #
 # Description:
-#     This script converts PNG images to JPG format and organizes the converted files in the "jpg" directory.
+#     This alias converts PNG images to JPG format.
 #
 # Usage:
 #     img_png_to_jpg
 #
 # Examples:
-#     img_png_to_jpg    # converts PNG to JPG and stores the files in the "jpg" directory
+#     img_png_to_jpg    # converts PNG to JPG
 #
 # Author:
 #     Petr Fusek
@@ -22,19 +23,5 @@
 
 . ImageMagick.sh
 
-
-img_png_to_jpg() {
-    # Create the "jpg" directory if it doesn't exist
-    if [ ! -d "jpg" ]; then
-        mkdir jpg
-    fi
-    
-    # Loop through all PNG files in the current directory
-    for file in *.png; do
-        # Extract the filename without the extension
-        filename="${file%.*}"
-        
-        # Convert the PNG file to JPG and move it to the "jpg" directory
-        convert "$file" "jpg/${filename}.jpg"
-    done
-}
+unalias img_png_to_jpg 2>/dev/null  # Remove any existing alias
+alias img_png_to_jpg='img_convert png jpg'
