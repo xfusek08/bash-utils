@@ -71,13 +71,18 @@ for file in $files; do
     push "$file"
 done
 
+# Initialize counters for statistics
+total_source_lines=0
+total_inlined_lines=0
+
 # Loop through the stack and inline the files
 for file in "${stack[@]}"; do
     # Initialize a counter for the number of inlined lines
     line_count=0
+    file_lines=0
     
-    # Append a newline at the end of the file to ensure the last line is read
     while IFS= read -r line || [[ -n $line ]]; do
+        ((file_lines++))
         # Omit commented lines, source/include lines, and empty lines
         if [[ ! $line =~ ^[[:space:]]*# ]] && [[ $line != .* ]] && [[ $line != source* ]] && [[ -n ${line//[[:space:]]/} ]]; then
             echo "$line" >> "$BUILD_DIR/.bash_aliases"
@@ -92,6 +97,18 @@ for file in "${stack[@]}"; do
         fi
     done < "$SOURCE_DIR/$file"
     
+    # Update total counters
+    total_source_lines=$((total_source_lines + file_lines))
+    total_inlined_lines=$((total_inlined_lines + line_count))
+    
     # Log inlined lines for this file in one line
     printf "Inlined %4d lines from %s\n" "$line_count" "$file"
 done
+
+# Print final statistics
+echo -e "\nFinal Statistics:"
+echo "Total source lines: $total_source_lines"
+echo "Total inlined lines: $total_inlined_lines"
+stripped_lines=$((total_source_lines - total_inlined_lines))
+stripped_percent=$(awk "BEGIN {printf \"%.1f\", ($stripped_lines / $total_source_lines) * 100}")
+echo "Stripped lines: $stripped_lines ($stripped_percent%)"

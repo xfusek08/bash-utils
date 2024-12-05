@@ -5,8 +5,12 @@ BUILD_DIR="$(pwd)/build"
 HOME_DIR="$HOME"
 SCRIPTS_DIR="$(pwd)/home-scripts"
 
-# Run the build script
-./build.sh
+# Run the build script with debug flag if specified
+if [[ "$1" == "--debug" ]]; then
+    ./build.sh --debug
+else
+    ./build.sh
+fi
 
 # Copy the .bash_aliases file to the user's home directory
 cp "$BUILD_DIR/.bash_aliases" "$HOME_DIR"
