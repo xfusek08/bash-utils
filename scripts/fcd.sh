@@ -46,8 +46,9 @@ fcd() {
     local prt=false
     local help=false
     local verbose=false
+    local debug_out="/dev/null"
     local opts
-    opts=$(getopt -o hapv --long help,all,print,verbose -n 'fcd' -- "$@")
+    opts=$(getopt -o hapv --long help,all,print,verbose,debug-out: -n 'fcd' -- "$@")
     
     if [ $? -ne 0 ]; then
         echo "ERROR: Failed to parse options." >&2
@@ -74,6 +75,10 @@ fcd() {
                 verbose=true
                 shift
                 ;;
+            --debug-out)
+                debug_out="$2"
+                shift 2
+                ;;
             --)
                 shift
                 break
@@ -84,6 +89,30 @@ fcd() {
                 ;;
         esac
     done
+
+    # Validate debug output file if specified
+    if [ "$debug_out" != "/dev/null" ]; then
+        # Expand ~ to $HOME if present
+        debug_out="${debug_out/#\~/$HOME}"
+        
+        # Check if directory exists
+        debug_dir=$(dirname "$debug_out")
+        if [ ! -d "$debug_dir" ]; then
+            echo "ERROR: Debug output directory does not exist: $debug_dir" >&2
+            return 1
+        fi
+        
+        # Try to touch the file or check if writable
+        if [ ! -e "$debug_out" ]; then
+            touch "$debug_out" 2>/dev/null || {
+                echo "ERROR: Cannot create debug output file: $debug_out" >&2
+                return 1
+            }
+        elif [ ! -w "$debug_out" ]; then
+            echo "ERROR: Debug output file is not writable: $debug_out" >&2
+            return 1
+        fi
+    fi
     
     # Get the directory to search in from the first argument
     local dirName="$1"
@@ -121,12 +150,18 @@ EOF
         return 0
     fi
     
-    # Use find to search for directories and use fzf to select one interactively
+    # Set additional find parameters based on all flag
+    local find_params="-xdev"
     if [ "$all" == "false" ]; then
-        local path=$(set -e && set -o pipefail && find_bfs -L "$dirName" -xdev -not -path '*/.*' 2>/dev/null | fzf)
-    else
-        local path=$(set -e && set -o pipefail && find_bfs -L "$dirName" -xdev 2>/dev/null | fzf)
+        find_params="$find_params -not -path '*/.*'"
     fi
+    
+    # Use find to search for directories and use fzf to select one interactively
+    local path=$(
+        set -e \
+        && set -o pipefail \
+        && find_bfs -L "$dirName" $find_params 2>"$debug_out" | fzf
+    )
     
     # Clean the path: remove carriage returns and trailing/leading whitespace
     path=$(echo "$path" | tr -d '\r' | xargs)
@@ -144,6 +179,7 @@ EOF
         echo "$path"
     else
         # Change to the selected directory using printf to handle special characters
+        echo "cd $(printf '%b' "${path}")"
         cd "$(printf '%b' "${path}")"
     fi
 }
