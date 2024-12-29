@@ -1,64 +1,71 @@
 #!/bin/bash
 
-# Redirect all output (stdout) and errors (stderr) to a log file in the home directory
-log_file="$HOME/fzdirmod_error.log"
+# Redirect all output and errors to a log file
+log_file="${HOME}/fzdirmod_error.log"
+[[ -f "${log_file}" ]] && rm "${log_file}"
 
-# Clean up the log file if it already exists
-if [[ -f "$log_file" ]]; then
-    rm "$log_file"
-fi
-
-exec > "$log_file" 2>&1
-
-# Function to open a new terminal, run a command, and return the result
-fzdirmod() {
-    # Get the directory name from argument or default to the current directory
-    local dir_name="${1:-$(pwd)}"
-
-    # Named pipe for inter-process communication
-    local pipe="/tmp/fzfpipe"
-    if [[ -p "$pipe" ]]; then
-        rm "$pipe"
-    fi
-    mkfifo "$pipe"
-
-    # Open file descriptor 3 for reading/writing to the named pipe
-    exec 3<>"$pipe"
-
-    # Display the directory in the current terminal (for user information) if a terminal exists
-    if [[ -t 1 ]]; then
-        echo "Opening directory: $dir_name" > /dev/tty
-    fi
-
-    # Build the command to run in the new terminal
-    local command="
-        source ~/.bash_aliases;   # Source user's aliases (if needed)
-        exec 3<>'$pipe';          # Reopen the pipe in the new shell
-        fcd \"$dir_name\" -p >&3; # Execute 'fcd' command, output to pipe
-        exec 3>&-;                # Close the pipe after the command
-    "
-
-    # Open a new terminal and execute the command via bash
-    gnome-terminal -- bash -c "$command"
-
-    # Read the output of the 'fcd' command from the pipe
-    local final_dir
-    final_dir=$(head -n1 <&3)
-
-    # If the selected directory is not empty, echo it
-    if [[ -n "$final_dir" ]]; then
-        echo "$final_dir"
-    fi
-
-    # Close file descriptor and remove the named pipe
-    exec 3>&-
-    rm "$pipe"
+log() {
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')] $*" >> "${log_file}"
 }
 
-# Call the fzdirmod function and store the selected directory in 'selected_dir'
-selected_dir=$(fzdirmod "$1")
+function fzdirmod() {
+    log "Executing fzdirmod function"
+    
+    # Get the directory name from argument or default to current directory
+    local dir_name="${1:-$(pwd)}"
+    
+    # Validate and expand the directory path
+    if [[ ! -d "${dir_name}" ]]; then
+        log "Error: '${dir_name}' is not a valid directory"
+        return 1
+    fi
+    
+    dir_name=$(realpath "${dir_name}")
+    if [[ $? -ne 0 ]]; then
+        log "Error: Failed to resolve path '${dir_name}'"
+        return 1
+    fi
+    
+    log "Opening directory: ${dir_name}"
 
-# If a directory was selected, open it in Double Commander
-if [[ -n "$selected_dir" ]]; then
-    doublecmd --no-splash --client "$selected_dir"
+    # Create temporary script file
+    local tmp_script=$(mktemp)
+    
+    # Write script content
+    cat > "${tmp_script}" << EOF
+#!/bin/zsh
+source ~/.zshrc
+
+function log() {
+    echo "[\\$(date +'%Y-%m-%d %H:%M:%S')] \$*" >> "${log_file}"
+}
+
+log "Current directory: ${dir_name}"
+selected_dir=\$(fcd -p "${dir_name}")
+
+if [[ -n "\$selected_dir" ]]; then
+    log "Selected directory: \$selected_dir"
+    doublecmd --no-splash --client "\$selected_dir"
+else
+    log "No directory selected"
 fi
+
+exit 0
+EOF
+
+    # Make script executable
+    chmod +x "${tmp_script}"
+    
+    log "Created temporary script: ${tmp_script}"
+    
+    log $(bat "${tmp_script}")
+
+    # Execute through ghostty
+    ghostty -e "zsh ${tmp_script}"
+
+    # Clean up
+    rm "${tmp_script}"
+}
+
+# Just call the function with the provided argument
+fzdirmod "$1"

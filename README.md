@@ -10,26 +10,11 @@ Prompts the user with a yes/no question and returns 0 for yes and 1 for no.
 ### `bat`
 Alias for `batcat`, a cat clone with syntax highlighting and Git integration.
 
-### `find_bfs`
-Performs a breadth-first search using the `find` command.
-
 ### `fcd`
 Changes the current directory to the specified directory or to a directory selected interactively using `fzf`.
 
 ### `findNoBin`
 Finds all non-binary files in the current directory and its subdirectories.
-
-### `fzcode`
-Searches for source code files in a specified directory using `ripgrep` and presents the results in a fuzzy-search interface (`fzf`). Opens the selected file in Visual Studio Code.
-
-### `histd`
-Deletes specified entries from the bash history.
-
-### `fzh`
-Searches the bash history using `fzf` and optionally deletes selected entries.
-
-### `fzp`
-Finds all non-binary files and presents them in a fuzzy-search interface (`fzf`) with a preview using `batcat`.
 
 ### `img_convert`
 Converts images from one format to another.

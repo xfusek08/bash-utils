@@ -30,7 +30,7 @@ BUILD_DIR="$(pwd)/build"
 mkdir -p "$BUILD_DIR"
 
 # Remove the build file if it exists
-rm -f "$BUILD_DIR/.bash_aliases"
+rm -f "$BUILD_DIR/.zsh_aliases"
 
 # Initialize the stack and seen arrays
 stack=()
@@ -85,7 +85,7 @@ for file in "${stack[@]}"; do
         ((file_lines++))
         # Omit commented lines, source/include lines, and empty lines
         if [[ ! $line =~ ^[[:space:]]*# ]] && [[ $line != .* ]] && [[ $line != source* ]] && [[ -n ${line//[[:space:]]/} ]]; then
-            echo "$line" >> "$BUILD_DIR/.bash_aliases"
+            echo "$line" >> "$BUILD_DIR/.zsh_aliases"
             ((line_count++))
             if $DEBUG; then
                 echo "🟢 Accepted: $line"

@@ -36,4 +36,4 @@
 #
 
 unalias bat 2>/dev/null #remove potential alias
-alias bat=batcat
+alias bat="batcat --paging=always --italic-text=always --color=always --decorations=always"
