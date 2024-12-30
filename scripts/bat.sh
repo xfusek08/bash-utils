@@ -28,7 +28,7 @@
 #
 # Author:
 #     Petr Fusek: petr.fusek97@gmail.com
-#
+#q
 # Thanks to:
 #     - The `bat` developers for creating a great tool.
 #         - https://github.com/sharkdp/bat

@@ -40,8 +40,6 @@
 #     - Chat GPT for helping me document this script! 🤖
 #
 
-. find_bfs.sh
-
 function fcd() {
     # Parse options and arguments
     local all=false
