@@ -38,7 +38,7 @@ function run_loader() {
             return ""
         fi
         log -d "Executing: ls -f $directory/*.zsh"
-        local files=$(ls -f $directory/*.zsh)
+        local files=$(ls -1 $directory/*.zsh) 2>/dev/null
         log -d "$level: Found files:\n$files"
         echo $files
     }
