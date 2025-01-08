@@ -6,12 +6,16 @@
 #
 # Description:
 #     This scripts registers the `fcd` into current shell session.
-#     The `fcd` command is a simple way to change the current directory to a directory selected interactively using fzf.
+#     The `fcd` command is a simple way to change the current directory
+#     or navigate to a file's location using an interactive fuzzy finder.
 #
 # Usage:
 #     fcd [OPTIONS] [DIRECTORY]
 #
-# Dependencies: fzf
+# Dependencies:
+#     - bfs (for directory traversal)
+#     - fzf (for fuzzy finding)
+#     - preview_file (for file preview functionality)
 #
 # Options:
 #     -h        Show this help message
@@ -20,7 +24,7 @@
 #     -v        Verbose mode - print additional information
 #
 # Directory:
-#     The directory to search for subdirectories in. Default is the current directory.
+#     The directory to search in. Default is the current directory.
 #
 # Examples:
 #     fcd ~/projects/myproject
@@ -29,7 +33,7 @@
 #     fcd -v  # show verbose output
 #
 # Notes:
-#     This script requires the following dependencies: fzf
+#     This script requires the following dependencies: bfs, fzf, preview_file
 #
 # Author:
 #     Petr Fusek: petr.fusek97@gmail.com
@@ -99,7 +103,9 @@ Changes the current directory to the specified directory or to a directory selec
 
 \033[1mNote:\033[0m
 This script requires the following dependencies:
-    - \033[1;36mfzf\033[0m
+    - \033[1;36mbfs\033[0m (for directory traversal)
+    - \033[1;36mfzf\033[0m (for fuzzy finding)
+    - \033[1;36mpreview_file\033[0m (for file preview)
 
 Please make sure to install these dependencies before using the script.
 EOF
@@ -107,15 +113,22 @@ EOF
         return 0
     fi
     
+    # Remove the preview_file function definition since we use the external script
+    
     # Set bfs arguments based on all flag
     local bfs_args=""
     [[ $all == "false" ]] && bfs_args="-nohidden"
     
-    # Use find to search for directories and use fzf to select one interactively
+    # Use the preview script directly without sourcing
+    local preview_script="$SCRIPTS_PATH/preview_file.zsh"
+    chmod +x "$preview_script" 2>/dev/null
     local findResult="$(
-        log "DEBUG" "executing bfs $searchDirectory $bfs_args | fzf --preview \"batcat --color=always --style=numbers --line-range=:500 {}\""
-        bfs "$searchDirectory" $bfs_args | fzf --preview "batcat --color=always --style=numbers --line-range=:500 {}"
+        bfs "$searchDirectory" $bfs_args | \
+        fzf --preview "fzf-preview.sh {}"
     )"
+    
+    # If no result found (user cancelled), exit quietly
+    [[ -z "$findResult" ]] && return 0
     
     log "DEBUG" "Extracting directory from findResult: $findResult"
     

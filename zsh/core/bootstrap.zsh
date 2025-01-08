@@ -1,4 +1,3 @@
-
 if [[ -z "$ZSH_SCRIPTING_DIRECTORY" ]]; then
     echo "Error: ZSH_SCRIPTING_DIRECTORY is not defined" >&2
     exit 1
@@ -9,6 +8,7 @@ ZSH_REQUIRE_ONCE_COMMAND=$(realpath "$ZSH_REQUIRE_ONCE_COMMAND")
 ZSH_LOADER_COMMAND_SOURCE="$ZSH_SCRIPTING_DIRECTORY/core/run_loader.zsh"
 CORE_PATH=$(realpath "$ZSH_SCRIPTING_DIRECTORY/core")
 LIB_PATH=$(realpath "$ZSH_SCRIPTING_DIRECTORY/lib")
+SCRIPTS_PATH=$(realpath "$ZSH_SCRIPTING_DIRECTORY/scripts")
 ZSH_BOOTSTRAP_PATH="$ZSH_SCRIPTING_DIRECTORY/core/bootstrap.zsh"
 
 # if require_once command does not exists
@@ -39,4 +39,5 @@ log -d "Bootstrap script loaded\n \
     ZSH_LOADER_COMMAND_SOURCE      = $ZSH_LOADER_COMMAND_SOURCE\n \
     ZSH_REQUIRE_ONCE_COMMAND       = $ZSH_REQUIRE_ONCE_COMMAND\n \
     CORE_PATH                      = $CORE_PATH\n \
-    LIB_PATH                       = $LIB_PATH"
+    LIB_PATH                       = $LIB_PATH\n \
+    SCRIPTS_PATH                   = $SCRIPTS_PATH"

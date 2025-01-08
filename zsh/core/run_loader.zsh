@@ -54,8 +54,8 @@ function run_loader() {
     # require_once all zsh files into current loader file
     for file in $(list_files_zsh "$input_directory"); do
         
-        # if file is in CORE_PATH directory, skip it
-        if [[ "$file" == "$CORE_PATH"* ]]; then
+        # if file is in CORE_PATH directory or SCRIPTS_PATH directory, skip it
+        if [[ "$file" == "$CORE_PATH"* || "$file" == "$SCRIPTS_PATH"* ]]; then
             continue
         fi
         
