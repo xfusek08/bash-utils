@@ -6,12 +6,15 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 function wakapi-start() {
-    docker volume create wakapi-data
+    # Create wakapi directory if it doesn't exist
+    mkdir -p ~/.wakapi
     
-    # if container exists remove it
-    if [ "$(docker ps -q -f name=wakapi)" ]; then
+    # if container exists, stop and remove it
+    if [ "$(docker ps -aq -f name=wakapi)" ]; then
         echo -e "${YELLOW}🛑 Stopping existing wakapi container...${NC}"
         docker stop wakapi
+        echo -e "${YELLOW}🗑️ Removing existing wakapi container...${NC}"
+        docker rm wakapi
     fi
     
     echo -e "${YELLOW}🚀 Starting wakapi container...${NC}"
@@ -20,9 +23,10 @@ function wakapi-start() {
 
     # Run the container
     docker run -d \
+        --rm \
         -p 3100:3000 \
         -e "WAKAPI_PASSWORD_SALT=$SALT" \
-        -v wakapi-data:/data \
+        -v ~/.wakapi:/data \
         --name wakapi \
         ghcr.io/muety/wakapi:latest
     
