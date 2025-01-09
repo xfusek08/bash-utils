@@ -9,6 +9,15 @@ function wakapi-start() {
     # Create wakapi directory if it doesn't exist
     mkdir -p ~/.wakapi
     
+    # Define salt file path
+    SALT_FILE=~/.wakapi/salt
+    # Generate or read salt
+    if [ ! -f "$SALT_FILE" ]; then
+        echo -e "${YELLOW}🔑 Generating new salt...${NC}"
+        cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1 > "$SALT_FILE"
+    fi
+    SALT=$(cat "$SALT_FILE")
+
     # if container exists, stop and remove it
     if [ "$(docker ps -aq -f name=wakapi)" ]; then
         echo -e "${YELLOW}🛑 Stopping existing wakapi container...${NC}"
@@ -19,11 +28,9 @@ function wakapi-start() {
     
     echo -e "${YELLOW}🚀 Starting wakapi container...${NC}"
 
-    SALT="$(cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9' | fold -w ${1:-32} | head -n 1)"
-
     # Run the container
     docker run -d \
-        --rm \
+        --restart unless-stopped \
         -p 3100:3000 \
         -e "WAKAPI_PASSWORD_SALT=$SALT" \
         -v ~/.wakapi:/data \
