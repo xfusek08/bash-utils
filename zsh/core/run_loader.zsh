@@ -31,7 +31,7 @@ function run_loader() {
         echo $directories
     }
 
-    function list_files_zsh() {
+    function list_all_zsh_files() {
         local directory="$1"
         if ! is_valid_directory "$directory"; then
             log -e "Directory $directory does not exist"
@@ -42,7 +42,6 @@ function run_loader() {
         log -d "$level: Found files:\n$files"
         echo $files
     }
-
     
     # iterate over directories and recursively call this script for each
     for directory in $(list_directories "$input_directory"); do
@@ -52,14 +51,18 @@ function run_loader() {
     log -d "Loading files from $input_directory on level $level"
 
     # require_once all zsh files into current loader file
-    for file in $(list_files_zsh "$input_directory"); do
+    for file in $(list_all_zsh_files "$input_directory"); do
         
         # if file is in CORE_PATH directory or SCRIPTS_PATH directory, skip it
         if [[ "$file" == "$CORE_PATH"* || "$file" == "$SCRIPTS_PATH"* ]]; then
             continue
         fi
         
-        log -d "Requiring $file"
+        if [[ "$(basename "$file")" == _* ]]; then
+            log -d "Requiring completion file $file"
+        else
+            log -d "Requiring $file"
+        fi
         require_once "$file"
     done
 }

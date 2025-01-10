@@ -1,4 +1,3 @@
-
 # Start time measurement
 zmodload zsh/datetime
 shell_start=$EPOCHREALTIME
@@ -18,6 +17,15 @@ if [ -f "$ZSH_SCRIPTING_BOOTSTRAP" ]; then
     source "$ZSH_SCRIPTING_BOOTSTRAP"
     run_loader "$ZSH_SCRIPTING_DIRECTORY"
 fi
+
+# Initialize completion
+autoload -U compinit
+compinit
+
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*' menu no
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls $realpath'
 
 # Display loading time at the end
 display_loading_time $shell_start

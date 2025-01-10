@@ -13,7 +13,7 @@ zinit snippet OMZP::copypath
 
 function copypath-widget() {
     copypath
-    zle -I # redraw
+    # zle -I # redraw
 }
 
 zle -N copypath-widget
