@@ -1,2 +1,2 @@
 
-alias dcd='docker compose down'
+alias dcd='docker compose down --remove-orphans'
