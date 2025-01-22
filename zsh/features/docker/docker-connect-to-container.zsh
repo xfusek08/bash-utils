@@ -1,3 +1,4 @@
+require_once "$ZSH_SCRIPTING_DIRECTORY/features/docker/_docker_completions.zsh"
 
 function docker-connect-to-container() {
     local container_id=$1
@@ -5,11 +6,4 @@ function docker-connect-to-container() {
 }
 
 alias dcc=docker-connect-to-container
-
-_docker_connect_to_container() {
-    local -a containers
-    containers=("${(@f)$(docker ps --format '{{.Names}}' 2>/dev/null)}")
-    _arguments "1:container:(${containers})"
-}
-
-compdef _docker_connect_to_container docker-connect-to-container
+compdef _docker_container_names_completion docker-connect-to-container
