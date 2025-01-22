@@ -1,3 +1,6 @@
+
+require_once "$ZSH_SCRIPTING_DIRECTORY/features/zinit.zsh"
+
 zinit snippet OMZP::git
 
 function git-set-me-xpro() {

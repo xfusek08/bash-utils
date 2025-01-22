@@ -1,4 +1,6 @@
 
+require_once "$ZSH_SCRIPTING_DIRECTORY/features/zinit.zsh"
+
 HISTFILE=~/.zsh_history
 HISTSIZE=5000
 SAVEHIST=5000
