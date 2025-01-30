@@ -11,5 +11,8 @@ exec-zsh() {
     zle -I
     exec zsh <$TTY
 }
+
+alias reload-zsh=exec-zsh
+
 zle -N exec-zsh
 bindkey "^[[15;3~" exec-zsh # Alt + f5
