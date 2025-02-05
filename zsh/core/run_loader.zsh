@@ -1,12 +1,10 @@
 #!/bin/zsh
 
-function run_loader() {
-    local input_directory_arg=${1:-"$FEATURES_PATH"} # when not set, run the loaded over the features directory
-    local input_directory=$(realpath "$input_directory_arg")
+require_once "$CORE_PATH/process_files_to_single_compiled_file.zsh"
+require_once "$LIB_PATH/is_valid_directory.zsh"
 
-    require_once "$LIB_PATH/is_valid_directory.zsh"
-
-    # if not a valid directory, exit
+function load_directories_recursive() {
+    local input_directory=$(realpath "$1")
     if ! is_valid_directory "$input_directory"; then
         log -e "Directory $input_directory does not exist"
         return 1
@@ -46,20 +44,13 @@ function run_loader() {
 
     # iterate over directories and recursively call this script for each
     for directory in $(list_directories "$input_directory"); do
-        run_loader "$directory" $(($level + 1))
+        load_directories_recursive "$directory" $(($level + 1))
     done
 
     log -d "Loading files from $input_directory on level $level"
 
     # require_once all zsh files into current loader file
     for file in $(list_all_zsh_files "$input_directory"); do
-
-        # if file is in CORE_PATH directory or SCRIPTS_PATH directory, skip it
-        if [[ "$file" == "$CORE_PATH"* || "$file" == "$SCRIPTS_PATH"* ]]; then
-            log -d "Skipping core or scripts file $file"
-            continue
-        fi
-
         if [[ "$(basename "$file")" == _* ]]; then
             log -d "Requiring completion file $file"
         else
@@ -67,4 +58,22 @@ function run_loader() {
         fi
         require_once "$file"
     done
+}
+
+function source_and_compile_features() {
+    require_once-start_capture
+    load_directories_recursive "$FEATURES_PATH"
+    local file_list=$(require_once-end-capture)
+    process_files_to_single_compiled_file "$file_list" "$ZSH_COMPILED_FEATURES_FILENAME"
+    source $SCRIPTS_PATH/on-compilation-finish.zsh
+}
+
+function run_loader() {
+    # if $ZSH_COMPILED_FEATURES_FILENAME file exists source it
+    if [[ -f "$ZSH_COMPILED_FEATURES_FILENAME" ]]; then
+        log -d "Sourcing $ZSH_COMPILED_FEATURES_FILENAME"
+        source "$ZSH_COMPILED_FEATURES_FILENAME"
+    else
+        source_and_compile_features
+    fi
 }

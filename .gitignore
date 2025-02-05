@@ -1,3 +1,6 @@
 build/
 .vscode/
 _load.zsh
+
+zsh/zprof.*
+zsh/compiled_features.zsh
