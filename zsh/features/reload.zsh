@@ -17,9 +17,6 @@ zle -N exec-zsh
 bindkey "^[[15;3~" exec-zsh # Alt + f5
 
 recompile-zsh() {
-    # Recompile zinit
-    zinit self-update
-    zinit update --all
     rm "$ZSH_COMPILED_FEATURES_FILENAME"
     reload-zsh
 }

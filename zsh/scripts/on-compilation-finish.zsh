@@ -4,4 +4,4 @@ log "executing on-compilation-finish.zsh"
 
 autoload -Uz compinit
 
-compinit
+compinit -i
