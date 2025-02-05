@@ -51,7 +51,7 @@ function fcd() {
     local help=false
     local verbose=false
     local searchDirectory
-    
+
     # Add logging function
     function log() {
         local level="$1"
@@ -75,13 +75,14 @@ function fcd() {
     [[ -n "${all}" ]] && all=true
     [[ -n "${print}" ]] && prt=true
     [[ -n "${verbose}" ]] && verbose=true
-    
+
     # Get the directory to search in from the first argument
     searchDirectory="${1:-$PWD}"
-    
+
     # Show help message if -h option is specified
     if [[ $help == "true" ]]; then
-        echo -e "$(cat <<EOF
+        echo -e "$(
+            cat <<EOF
 \033[1mUsage:\033[0m fcd [OPTIONS] [DIRECTORY]
 
 Changes the current directory to the specified directory or to a directory selected interactively using \033[1;36mfzf\033[0m.
@@ -109,35 +110,35 @@ This script requires the following dependencies:
 
 Please make sure to install these dependencies before using the script.
 EOF
-)"
+        )"
         return 0
     fi
-    
+
     # Remove the preview_file function definition since we use the external script
-    
+
     # Set bfs arguments based on all flag
     local bfs_args=""
     [[ $all == "false" ]] && bfs_args="-nohidden"
-    
+
     # Use the preview script directly without sourcing
     local preview_script="$SCRIPTS_PATH/preview_file.zsh"
     chmod +x "$preview_script" 2>/dev/null
     local findResult="$(
-        bfs "$searchDirectory" $bfs_args | \
-        fzf --preview "fzf-preview.sh {}"
+        bfs "$searchDirectory" $bfs_args |
+            fzf --preview "fzf-preview.sh {}"
     )"
-    
+
     # If no result found (user cancelled), exit quietly
     [[ -z "$findResult" ]] && return 0
-    
+
     log "DEBUG" "Extracting directory from findResult: $findResult"
-    
+
     if [[ -f $findResult ]]; then
         findResult=$(dirname "$findResult")
     fi
-    
+
     log "DEBUG" "Will navigate to $findResult"
-    
+
     # Print the selected directory if -p option is specified
     if [[ $prt == "true" ]]; then
         print -r -- "$findResult"

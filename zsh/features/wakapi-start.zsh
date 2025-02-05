@@ -8,13 +8,13 @@ NC='\033[0m' # No Color
 function wakapi-start() {
     # Create wakapi directory if it doesn't exist
     mkdir -p ~/.wakapi
-    
+
     # Define salt file path
     SALT_FILE=~/.wakapi/salt
     # Generate or read salt
     if [ ! -f "$SALT_FILE" ]; then
         echo -e "${YELLOW}🔑 Generating new salt...${NC}"
-        cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1 > "$SALT_FILE"
+        cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1 >"$SALT_FILE"
     fi
     SALT=$(cat "$SALT_FILE")
 
@@ -25,7 +25,7 @@ function wakapi-start() {
         echo -e "${YELLOW}🗑️ Removing existing wakapi container...${NC}"
         docker rm wakapi
     fi
-    
+
     echo -e "${YELLOW}🚀 Starting wakapi container...${NC}"
 
     # Run the container
@@ -36,7 +36,7 @@ function wakapi-start() {
         -v ~/.wakapi:/data \
         --name wakapi \
         ghcr.io/muety/wakapi:latest
-    
+
     # message that container is running successfully
     if [ "$(docker ps -q -f name=wakapi)" ]; then
         echo -e "${GREEN}✅ Wakapi is running successfully on port: 3100!${NC}"

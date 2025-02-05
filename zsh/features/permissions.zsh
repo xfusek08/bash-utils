@@ -57,9 +57,9 @@ function perm-restricted-me() {
 function group-list() {
     local user="${1:-}"
     local header="%-8s ${WHITE}%-30s${RESET} %s\n"
-    
+
     printf "$header" "GID" "GROUP" "MEMBERS"
-    
+
     if [[ -z "$user" || "$user" == "all" ]]; then
         _list_all_groups
     else
@@ -90,29 +90,30 @@ function _format_member_list() {
     local show_uid=$2
     local highlight_user=$3
     local result=""
-    
-    for member in ${(s:,:)members}; do
-        [[ -z "$member" ]] && continue
-        local uid=$(_get_user_uid "$member")
-        local member_fmt="$member($uid)"
-        
-        if [[ -n "$highlight_user" && "$member" == "$highlight_user" ]]; then
-            member_fmt="${GOLD}$member_fmt${RESET}"
-        fi
-        
-        result="${result:+$result,}$member_fmt"
-    done
-    
+
+    # Use echo and tr to split members instead of parameter expansion
+    if [[ -n "$members" ]]; then
+        for member in $(echo "$members" | tr ',' ' '); do
+            local uid=$(_get_user_uid "$member")
+            local member_fmt="$member($uid)"
+
+            if [[ -n "$highlight_user" && "$member" == "$highlight_user" ]]; then
+                member_fmt="${GOLD}$member_fmt${RESET}"
+            fi
+
+            result="${result:+$result,}$member_fmt"
+        done
+    fi
+
     echo "$result"
 }
-
 # USER INFORMATION
 # --------------
 
 function user-list() {
     local current_user=$(whoami)
     printf "%-8s %-28s %s\n" "UID" "USER" "GROUPS"
-    
+
     getent passwd | sort -n -t: -k3 | while IFS=: read -r username x uid gid rest; do
         _format_user_entry "$username" "$uid" "$current_user"
     done
@@ -122,18 +123,18 @@ function _format_user_entry() {
     local username=$1
     local uid=$2
     local current_user=$3
-    
+
     # Skip if can't get primary group
     primary_info=$(id -ng "$username" 2>/dev/null) || return
-    
+
     local primary_gid=$(id -g "$username" 2>/dev/null)
     local name_color="${username}" # default no color
     [[ "$username" == "$current_user" ]] && name_color="${GOLD}${username}${RESET}" || name_color="${WHITE}${username}${RESET}"
-    
+
     local groups_list
     groups_list=$(_format_user_groups "$username" "$primary_info" "$primary_gid")
     [[ -z "$groups_list" ]] && return
-    
+
     printf "%-8s %-28b %b\n" "$uid" "$name_color" "$groups_list"
 }
 
@@ -141,7 +142,7 @@ function _format_user_groups() {
     local username=$1
     local primary_info=$2
     local primary_gid=$3
-    
+
     local supplementary
     supplementary=$(_get_supplementary_groups "$username" "$primary_info")
     printf "%s%s%s%s" "${GREEN}${primary_info}(${primary_gid})${RESET}" "${supplementary:+, }" "$supplementary"
@@ -150,7 +151,7 @@ function _format_user_groups() {
 function _get_supplementary_groups() {
     local username=$1
     local primary_info=$2
-    
+
     id -nG "$username" 2>/dev/null | tr ' ' '\n' | grep -v "^$primary_info\$" | while read -r group; do
         local gid=$(getent group "$group" | cut -d: -f3)
         [[ -n "$gid" ]] && printf "%s(%s)" "$group" "$gid"
@@ -183,9 +184,9 @@ function service-list-on-startup() {
     local WHITE="\033[1;37m"
     local RESET="\033[0m"
     printf "${WHITE}%-40s %s${RESET}\n" "SERVICE" "STATUS"
-    systemctl list-unit-files --type=service --state=enabled \
-        | grep -v "^$\|listed$" \
-        | sed 's/\.service[[:space:]]*/ /' \
-        | awk '{printf "%-40s %s\n", $1, $2}' \
-        | sort
+    systemctl list-unit-files --type=service --state=enabled |
+        grep -v "^$\|listed$" |
+        sed 's/\.service[[:space:]]*/ /' |
+        awk '{printf "%-40s %s\n", $1, $2}' |
+        sort
 }

@@ -3,7 +3,7 @@ require_once "$SCRIPTS_PATH/ensure-entr.zsh"
 watch-on-change() {
     local files=()
     local all_files=""
-    
+
     while [[ $# -gt 0 && "$1" != "--" ]]; do
         if [ -d "$1" ]; then
             # For directories, find all files recursively
@@ -14,14 +14,14 @@ watch-on-change() {
         fi
         shift
     done
-    
-    shift  # skip the -- separator
-    
+
+    shift # skip the -- separator
+
     if [[ -z "$all_files" ]]; then
         echo "Error: No files specified to watch"
         return 1
     fi
-    
+
     if [[ $# -eq 0 ]]; then
         echo "Error: No command specified after --"
         return 1

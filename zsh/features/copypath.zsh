@@ -1,4 +1,3 @@
-
 # Add shortcut "Alt + o" to copy the current path to the clipboard
 
 # https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/copypath

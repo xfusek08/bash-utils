@@ -1,4 +1,3 @@
-
 # Configuration is based on this video:
 # https://www.youtube.com/watch?v=ud7YxC33Z3w
 

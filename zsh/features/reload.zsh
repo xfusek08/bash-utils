@@ -1,4 +1,3 @@
-
 require_once "$ZSH_SCRIPTING_DIRECTORY/features/zinit.zsh"
 
 # Reload on alt + f5 shortcut

@@ -1,4 +1,3 @@
-
 print_image_layers() {
     if [ -z "$1" ]; then
         echo "Usage: print_image_layers <image_name_or_id>"
