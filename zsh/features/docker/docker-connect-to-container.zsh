@@ -18,4 +18,5 @@ function docker-connect-to-container() {
 }
 
 alias dcc=docker-connect-to-container
+
 compdef _docker_container_names_completion docker-connect-to-container

@@ -1,7 +1,3 @@
-# Check if entr is already installed
-if command -v entr >/dev/null 2>&1; then
-    return 0
-fi
 
 function _install_entr() {
     echo "entr not found. Installing from source..."

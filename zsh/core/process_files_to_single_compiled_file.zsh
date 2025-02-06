@@ -39,6 +39,11 @@ process_files_to_single_compiled_file() {
 
     # for each line in files
     while IFS= read -r file; do
+        # Debug log if enabled
+        if [[ "$ZSH_DEBUG" == "true" ]]; then
+            printf '%s\n' "echo \"Loading file: $file\"" >>"$output_file_name"
+        fi
+
         # if file is invalid log error and continue
         if [[ ! -f "$file" ]]; then
             log -e "File $file does not exist, skipping"
@@ -47,10 +52,29 @@ process_files_to_single_compiled_file() {
 
         local line_count=0
         local file_lines=0
+        local inlining_disabled=0
 
         log -d "Processing file $file"
         while IFS= read -r line || [[ -n $line ]]; do
             ((file_lines++))
+            
+            # if line is "# no-compile" comment, disable inlining and continue to the next line
+            if [[ "$line" == "# no-compile" ]]; then
+                inlining_disabled=1
+                log -d "🔴 Inlining disabled"
+                continue
+            fi
+            
+            # if inlining is disabled
+            if [[ $inlining_disabled -eq 1 ]]; then
+                # if line is "# end-no-compile" comment, enable inlining and continue to the next line
+                if [[ "$line" == "# end-no-compile" ]]; then
+                    inlining_disabled=0
+                    log -d "🟢 Inlining enabled"
+                fi
+                continue
+            fi
+            
             # Use print -r instead of echo to preserve literal escape sequences.
             filtered_line=$(print -r -- "$line" | filter_not_commented | filter_not_empty | filter_not_require_once)
             if [[ -n "$filtered_line" ]]; then

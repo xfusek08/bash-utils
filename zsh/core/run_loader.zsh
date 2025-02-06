@@ -65,15 +65,19 @@ function source_and_compile_features() {
     load_directories_recursive "$FEATURES_PATH"
     local file_list=$(require_once-end-capture)
     process_files_to_single_compiled_file "$file_list" "$ZSH_COMPILED_FEATURES_FILENAME"
-    source $SCRIPTS_PATH/on-compilation-finish.zsh
+    
 }
 
 function run_loader() {
     # if $ZSH_COMPILED_FEATURES_FILENAME file exists source it
     if [[ -f "$ZSH_COMPILED_FEATURES_FILENAME" ]]; then
-        log -d "Sourcing $ZSH_COMPILED_FEATURES_FILENAME"
+        log "Loading completion from cache"
+        compinit -C
+        log "Sourcing $ZSH_COMPILED_FEATURES_FILENAME"
         source "$ZSH_COMPILED_FEATURES_FILENAME"
     else
         source_and_compile_features
+        log "Compiling completions"
+        compinit -i
     fi
 }

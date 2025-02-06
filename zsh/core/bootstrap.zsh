@@ -3,6 +3,8 @@ if [[ -z "$ZSH_SCRIPTING_DIRECTORY" ]]; then
     exit 1
 fi
 
+# Set up global paths:
+
 ZSH_REQUIRE_ONCE_COMMAND="${ZSH_REQUIRE_ONCE_COMMAND:-$ZSH_SCRIPTING_DIRECTORY/core/require_once.zsh}" # if not set, set it to default
 ZSH_REQUIRE_ONCE_COMMAND=$(realpath "$ZSH_REQUIRE_ONCE_COMMAND")
 ZSH_LOADER_COMMAND_SOURCE="$ZSH_SCRIPTING_DIRECTORY/core/run_loader.zsh"
@@ -12,6 +14,20 @@ SCRIPTS_PATH=$(realpath "$ZSH_SCRIPTING_DIRECTORY/scripts")
 FEATURES_PATH=$(realpath "$ZSH_SCRIPTING_DIRECTORY/features")
 ZSH_BOOTSTRAP_PATH="$ZSH_SCRIPTING_DIRECTORY/core/bootstrap.zsh"
 ZSH_COMPILED_FEATURES_FILENAME="$ZSH_SCRIPTING_DIRECTORY/compiled_features.zsh"
+
+# Set up debug mode and log level:
+
+ZSH_DEBUG="${ZSH_DEBUG:-false}"
+ZSH_SCRIPTING_LOG_LEVEL="${ZSH_SCRIPTING_LOG_LEVEL:-null}"
+# if log level is not set, set it to null
+if [[ "$ZSH_SCRIPTING_LOG_LEVEL" == "null" ]]; then
+    # if debug
+    if [[ "$ZSH_DEBUG" == "true" ]]; then
+        ZSH_SCRIPTING_LOG_LEVEL="DEBUG"
+    else
+        ZSH_SCRIPTING_LOG_LEVEL="WARNING"
+    fi
+fi
 
 # if require_once command does not exists, source it
 if ! declare -f require_once >/dev/null; then

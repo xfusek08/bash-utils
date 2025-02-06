@@ -6,4 +6,5 @@ function docker-show-container-logs() {
 }
 
 alias dcl=docker-show-container-logs
+
 compdef _docker_container_names_completion docker-show-container-logs
