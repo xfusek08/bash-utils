@@ -56,7 +56,8 @@ function load_directories_recursive() {
         else
             log -d "Requiring $file"
         fi
-        require_once "$file"
+        local dir_name="$(dirname "$file")"
+        require_once "$file" "$dir_name"
     done
 }
 
