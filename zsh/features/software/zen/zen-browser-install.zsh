@@ -2,7 +2,7 @@ require_once '../../utils/ensure_directory.zsh'
 require_once '../jq.zsh'
 
 function zen-browser-install() {
-    local original_pwd=$(pwd)
+    local original_pwd=$PWD
     
     # prepare directories
     # -------------------
@@ -11,16 +11,16 @@ function zen-browser-install() {
     local install_directory="$main_directory/zen"
     local backup_file="$main_directory/zen_backup_$(date +%Y%m%d_%H%M%S).tar.gz"
     
-    ensue_directory "$main_directory"
+    ensure_directory "$main_directory"
     ensure_directory "$install_directory"
     
     # Local functions
     # ---------------
     
     local install_tarball() {
-        local tarball_url="$1"
-        local target_directory="$2"
-        echo "Installing Zen tarball \"$tarball_url\" into \"$target_directory\""
+        local tarball_url=$1
+        local target_directory=$2
+        echo "Installing Zen tarball '$tarball_url' into '$target_directory'"
         tar -xJf "$temp_tarball" -C "$target_directory"
     }
     
@@ -31,7 +31,7 @@ function zen-browser-install() {
     }
     
     local revert_installation() {
-        if [ ! -f "$backup_file" ]; then
+        if [[ ! -f "$backup_file" ]]; then
             echo "No backup file found at $backup_file, cannot revert"
             return 1
         fi
@@ -48,7 +48,7 @@ function zen-browser-install() {
     echo "Downloading Zen from: $tarball_url"
     local temp_tarball=$(mktemp "/tmp/zen.XXXXXX.tar.xz")
     wget -O "$temp_tarball" "$tarball_url"
-    if [ $? -ne 0 ]; then
+    if [[ $? -ne 0 ]]; then
         echo "Failed to download Zen tarball"
         return 1
     fi
@@ -56,7 +56,7 @@ function zen-browser-install() {
     # Create backup of existing zen installation
     # ------------------------------------------
     
-    if [ -n "$(ls -A "$install_directory")" ]; then
+    if [[ -n $(ls -A "$install_directory" 2>/dev/null) ]]; then
         echo "Backing up existing Zen installation into $backup_file"
         tar -czf "$backup_file" -C "$install_directory" .
         clear_install_directory
@@ -77,7 +77,7 @@ function zen-browser-install() {
     # -----------------------------------
     
     # check if there is content in install directory
-    if [ -z "$(ls -A "$install_directory")" ]; then
+    if [[ -z $(ls -A "$install_directory" 2>/dev/null) ]]; then
         echo "Extraction failed, reverting installation"
         revert_installation
         return 1
@@ -89,10 +89,7 @@ function zen-browser-install() {
 
     echo "Registering Zen executable"
     ensure_directory "$HOME/.local/bin"
-    # remove existing link if it exists
-    if [ -L "$HOME/.local/bin/zen" ]; then
-        rm -f "$HOME/.local/bin/zen"
-    fi
+    [[ -L "$HOME/.local/bin/zen" ]] && rm -f "$HOME/.local/bin/zen"
     ln -sf "$install_directory/zen" "$HOME/.local/bin/zen"
     
     # Create desktop icon
@@ -111,9 +108,9 @@ Exec=zen
 Terminal=false
 X-MultipleArgs=false
 Type=Application
-Icon=$install_directory/zen/browser/chrome/icons/default/default128.png
+Icon=$install_directory/browser/chrome/icons/default/default128.png
 Categories=GNOME;GTK;Network;WebBrowser;
-MimeType=text/html;text/xml;application/xhtml+xml;application/xml;application/rss+xml;application/rdf+xml;image/gif;image/jpeg;image/png;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ftp;x-scheme-handler/chrome;video/webm;application/x-xpinstall;
+MimeType=text/html;text/xml;application/xhtml+xml;application/rss+xml;application/rdf+xml;image/gif;image/jpeg;image/png;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ftp;x-scheme-handler/chrome;video/webm;application/x-xpinstall;
 StartupNotify=true
 EOF
 
