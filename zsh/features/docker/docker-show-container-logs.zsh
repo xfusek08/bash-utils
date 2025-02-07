@@ -1,4 +1,4 @@
-require_once "$ZSH_SCRIPTING_DIRECTORY/features/docker/_docker_completions.zsh"
+require_once "_docker_completions.zsh"
 
 function docker-show-container-logs() {
     local container_id=$1

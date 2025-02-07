@@ -13,6 +13,7 @@ function display_loading_time() {
 
 # ZSH_DEBUG=true
 # ZSH_SCRIPTING_LOG_LEVEL=INFO
+ZSH_BACKUP_DIR="$HOME/DiskGoogle/Zalohy"
 ZSH_SCRIPTING_DIRECTORY=${ZSH_SCRIPTING_DIRECTORY:-"$HOME/sw/repo/personal/bash-utils/zsh"}
 ZSH_SCRIPTING_BOOTSTRAP="$ZSH_SCRIPTING_DIRECTORY/core/bootstrap.zsh"
 

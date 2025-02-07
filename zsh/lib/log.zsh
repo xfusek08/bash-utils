@@ -1,4 +1,3 @@
-
 # Compare if the message level is high enough to be logged
 function _should_log() {
         # Define log levels (higher number = higher priority)
@@ -26,22 +25,24 @@ function _should_log() {
 function log() {
     local type="INFO"
     local color="37"
+    local force=0   # initialize force flag
     
     # Parse options
-    while getopts "iewdh" opt; do
+    while getopts "iewdfh" opt; do
         case "$opt" in
             i) type="INFO" ; color="37" ;;
             e) type="ERROR" ; color="31" ;;
             w) type="WARNING" ; color="33" ;;
             d) type="DEBUG" ; color="32" ;;
-            h) echo "Usage: log [-i|-e|-w|-d] message" ; return 0 ;;
-            ?) echo "Invalid option. Usage: log [-i|-e|-w|-d] message" >&2 ; return 1 ;;
+            f) force=1 ;;  # force flag: log regardless of log level
+            h) echo "Usage: log [-i|-e|-w|-d|-f] message" ; return 0 ;;
+            ?) echo "Invalid option. Usage: log [-i|-e|-w|-d|-f] message" >&2 ; return 1 ;;
         esac
     done
     shift $((OPTIND-1))
     
-    # Check if this message should be logged based on level
-    if ! _should_log "$type"; then
+    # Check if message should be logged based on level unless force flag is set
+    if [ $force -eq 0 ] && ! _should_log "$type"; then
         return 0
     fi
     
