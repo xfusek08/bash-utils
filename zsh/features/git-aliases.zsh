@@ -1,3 +1,4 @@
+
 require_once "$ZSH_SCRIPTING_DIRECTORY/features/zinit.zsh"
 
 zinit snippet OMZP::git
@@ -11,6 +12,49 @@ function git-set-me-gmail() {
     git config user.name "Petr Fusek"
     git config user.email petr.fusek97@gmail.com
 }
+
+function git-last-commit-rename() {
+    # glcr - Git Last Commit Rename
+    # A utility to amend the last git commit message using Visual Studio Code
+
+    # Check if we're in a git repository
+    if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        echo "Error: Not in a git repository"
+        return 1
+    fi
+
+    # Create a temporary file for editing the commit message
+    TEMP_FILE=$(mktemp)
+
+    # Get the last commit message and put it in the temporary file, commented out
+    echo "# Current commit message (commented out for reference):" > "$TEMP_FILE"
+    git log -1 --pretty=%B | sed 's/^/# /' >> "$TEMP_FILE"
+    echo -e "\n# Enter your new commit message above this line." >> "$TEMP_FILE"
+    echo "# Lines starting with '#' will be ignored." >> "$TEMP_FILE"
+
+    # Open VSCode to edit the file and wait for it to close
+    code --wait "$TEMP_FILE"
+
+    # Check if the file has content other than comments and empty lines
+    NON_COMMENT_LINES=$(grep -v "^#" "$TEMP_FILE" | grep -v "^$" | wc -l)
+    if [ "$NON_COMMENT_LINES" -eq 0 ]; then
+        echo "Abort: No new commit message provided"
+        rm "$TEMP_FILE"
+        return 1
+    fi
+
+    # Extract only the non-comment lines to use as the new commit message
+    grep -v "^#" "$TEMP_FILE" > "${TEMP_FILE}.new"
+
+    # Amend the commit with the new message
+    git commit --amend -F "${TEMP_FILE}.new"
+    echo "Commit message updated successfully"
+
+    # Clean up temporary files
+    rm "$TEMP_FILE" "${TEMP_FILE}.new"
+}
+
+alias glcr=git-last-commit-rename
 
 function generate-git-alias-list() {
     local green='\033[0;32m'
@@ -219,6 +263,7 @@ function gah_raw() {
     printf "${green}gwtls${reset} -> ${blue}git worktree list${reset} -> List all working trees\n"
     printf "${green}gwtmv${reset} -> ${blue}git worktree move${reset} -> Move a working tree\n"
     printf "${green}gwtrm${reset} -> ${blue}git worktree remove${reset} -> Remove a working tree\n"
+    printf "${green}glcr${reset} -> ${blue}edit and amend last commit message in VS Code${reset} -> Open the last commit message in VS Code for editing and amend the commit\n"
 }
 
 function gah() {
