@@ -3,4 +3,5 @@ build/
 _load.zsh
 
 zsh/zprof.*
+zsh/completions
 zsh/compiled_features.zsh
