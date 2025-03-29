@@ -30,5 +30,3 @@ fi
 
 # Display loading time at the end
 display_loading_time $shell_start
-
-# zprof | bat

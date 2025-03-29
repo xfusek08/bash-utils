@@ -1,168 +1,422 @@
 "$schema" = 'https://starship.rs/config-schema.json'
-add_newline = false
-palette = "tailwind"
+
+add_newline = true
+
+command_timeout = 2000
+
 format = """
-$status\
-${custom.git_host}\
 $directory\
-$git_branch\
 $fill\
-${custom.since_last_commit}\
-$git_state\
-$git_commit\
-$git_metrics\
-$git_status\
-$git_commit\
-$lua\
+$c\
+$rust\
+$golang\
 $nodejs\
-$deno\
+$php\
+$java\
+$kotlin\
+$haskell\
+$python\
 $package\
-$dotnet\
+$git_branch\
+$git_commit\
+$git_status\
+$git_metrics\
+$git_state\
 $docker_context\
+$kubernetes\
+$container\
+$jobs\
+${custom.memory_usage}\
+${custom.battery}\
+${custom.keyboard_layout}\
 $cmd_duration\
+$status\
 $line_break\
 $character\
 """
 
-[palettes.tailwind]
-fg = "#ffffff"
-rosewater = "#f5e0dc"
-flamingo = "#f2cdcd"
-pink = "#f5c2e7"
-mauve = "#cba6f7"
-red = "#f38ba8"
-maroon = "#eba0ac"
-peach = "#fab387"
-yellow = "#f9e2af"
-green = "#a6e3a1"
-teal = "#94e2d5"
-sky = "#89dceb"
-sapphire = "#74c7ec"
-blue = "#89b4fa"
-lavender = "#b4befe"
-text = "#cdd6f4"
-subtext1 = "#bac2de"
-subtext0 = "#a6adc8"
-overlay2 = "#9399b2"
-overlay1 = "#7f849c"
-overlay0 = "#6c7086"
-surface2 = "#585b70"
-surface1 = "#45475a"
-surface0 = "#313244"
-base = "#1e1e2e"
-mantle = "#181825"
-crust = "#11111b"
+palette = 'default'
 
-[docker_context]
-format = '[ $context](sky) '
+[palettes.default]
 
-[lua]
-format = '[󰢱 $version](blue) '
+color_ok = 'bright-green'
+color_danger = 'bright-red'
+color_caution = 'bright-yellow'
+
+color_os = 'red'
+color_username = 'red'
+color_directory = 'yellow'
+color_git = 'cyan'
+color_git_added = 'bright-green'
+color_git_deleted = 'bright-red'
+color_env = 'blue'
+color_kubernetes = 'purple'
+color_docker = 'blue'
+color_shell = ''
+color_container = ''
+color_other = ''
+color_time = ''
+color_duration = ''
+
+color_vimcmd_ok = 'green'
+color_vimcmd_replace = 'purple'
+color_vimcmd_visual = 'yellow'
+
+[palettes.gruvbox_dark]
+
+color_ok = '#b8bb26'
+color_danger = '#fb4934'
+color_caution = '#d79921'
+
+color_os = '#d65d0e'
+color_username = '#d65d0e'
+color_directory = '#d79921'
+color_git = '#689d6a'
+color_git_added = '#b8bb26'
+color_git_deleted = '#fb4934'
+color_env = '#458588'
+color_kubernetes = '#b16286'
+color_docker = '#458588'
+color_shell = '#a89984'
+color_container = '#cc241d'
+color_other = '#d5c4a1'
+color_time = '#fbf1c7'
+color_duration = '#fbf1c7'
+
+color_vimcmd_ok = '#8ec07c'
+color_vimcmd_replace = '#b16286'
+color_vimcmd_visual = '#d79921'
+
+[palettes.gruvbox_light]
+
+color_ok = '#79740e'
+color_danger = '#9d0006'
+color_caution = '#d79921'
+
+color_os = '#d65d0e'
+color_username = '#d65d0e'
+color_directory = '#d79921'
+color_git = '#689d6a'
+color_git_added = '#79740e'
+color_git_deleted = '#9d0006'
+color_env = '#458588'
+color_kubernetes = '#b16286'
+color_docker = '#458588'
+color_shell = '#7c6f64'
+color_container = '#cc241d'
+color_other = '#504945'
+color_time = '#282828'
+color_duration = '#282828'
+
+color_vimcmd_ok = '#689d6a'
+color_vimcmd_replace = '#b16286'
+color_vimcmd_visual = '#d79921'
+
+[os]
+disabled = false
+style = "fg:color_os"
+format = '[$symbol ]($style)'
+
+[os.symbols]
+Windows = "󰍲"
+Ubuntu = "󰕈"
+SUSE = ""
+Raspbian = "󰐿"
+Mint = "󰣭"
+Macos = "󰀵"
+Manjaro = ""
+Linux = "󰌽"
+Gentoo = "󰣨"
+Fedora = "󰣛"
+Alpine = ""
+Amazon = ""
+Android = ""
+Arch = "󰣇"
+Artix = "󰣇"
+EndeavourOS = ""
+CentOS = ""
+Debian = "󰣚"
+Redhat = "󱄛"
+RedHatEnterprise = "󱄛"
+Pop = ""
+
+[username]
+show_always = true
+style_user = "fg:color_username"
+style_root = "bold fg:color_danger"
+format = '[ $user ]($style)'
+
+[directory]
+style = "fg:color_directory"
+read_only_style = "fg:color_directory"
+repo_root_style = "bold fg:color_directory"
+format = "[ $path ]($style)"
+read_only = " "
+home_symbol = "~"
+truncation_symbol = "…/"
+truncation_length = 15
+truncate_to_repo = false
+fish_style_pwd_dir_length = 0
+use_logical_path = true
+
+[git_branch]
+symbol = ""
+style = "fg:color_git"
+format = '[( $symbol $branch )]($style)'
+only_attached = true
+ignore_branches = []
+truncation_length = 25
+truncation_symbol = "..."
+always_show_remote = false
+disabled = false
+
+[git_commit]
+style = "fg:color_git"
+format = "[(( $tag)( @$hash) )]($style)"
+commit_hash_length = 7
+only_detached = true
+tag_symbol = "󰓼 "
+tag_disabled = false
+disabled = false
+
+[git_status]
+style = "fg:color_git"
+format = '[($ahead_behind )($all_status )]($style)'
+stashed = "*${count}"
+ahead = "⇡${count}"
+behind = "⇣${count}"
+up_to_date = ""
+diverged = "⇡${ahead_count}⇣${behind_count}"
+conflicted = "=${count}"
+deleted = "×${count}"
+renamed = "»${count}"
+modified = "!${count}"
+staged = "+${count}"
+untracked = "?${count}"
+ignore_submodules = false
+disabled = false
+
+[git_metrics]
+format = '[(([+$added]($added_style))([-$deleted]($deleted_style)) )](fg:color_git)'
+added_style = "fg:color_git_added"
+deleted_style = "fg:color_git_deleted"
+only_nonzero_diffs = true
+disabled = false
+
+[git_state]
+style = "fg:color_danger"
+format = '[($state( $progress_current/$progress_total) )]($style bold)'
+rebase = "REBASING"
+merge = "MERGING"
+revert = "REVERTING"
+cherry_pick = "CHERRY-PICKING"
+bisect = "BISECTING"
+am = "AM"
+am_or_rebase = "AM/REBASE"
+disabled = false
+
+[nodejs]
+symbol = ""
+style = "fg:color_env"
+format = '[( $symbol( $version) )]($style)'
+
+[c]
+symbol = ""
+style = "fg:color_env"
+format = '[( $symbol( $version) )]($style)'
+
+[rust]
+symbol = "󱘗"
+style = "fg:color_env"
+format = '[( $symbol( $version) )]($style)'
+
+[golang]
+symbol = "󰟓"
+style = "fg:color_env"
+format = '[( $symbol( $version) )]($style)'
+
+[php]
+symbol = ""
+style = "fg:color_env"
+format = '[( $symbol( $version) )]($style)'
+
+[java]
+symbol = ""
+style = "fg:color_env"
+format = '[( $symbol( $version) )]($style)'
+
+[kotlin]
+symbol = ""
+style = "fg:color_env"
+format = '[( $symbol( $version) )]($style)'
+
+[haskell]
+symbol = ""
+style = "fg:color_env"
+format = '[( $symbol( $version) )]($style)'
+
+[python]
+symbol = ""
+style = "fg:color_env"
+format = '[( $symbol( $version)( $virtualenv) )]($style)'
+version_format = '${raw}'
 
 [package]
-symbol = " "
-style = "teal"
 disabled = false
-display_private = true
-format = '[$symbol$version]($style) '
+symbol = "󰏗"
+style = "fg:color_env"
+format = '[( $symbol( $version) )]($style)'
 
-[fill]
-symbol = " "
-style = 'green'
+[docker_context]
+symbol = ""
+style = "fg:color_docker"
+format = '[( $symbol( $context) )]($style)'
+
+[kubernetes]
+symbol = "󱃾"
+style = "fg:color_kubernetes"
+format = '[( $symbol( $cluster) )]($style)'
+disabled = false
+
+[shell]
+disabled = false
+format = '[  $indicator ]($style)'
+bash_indicator = "bash"
+fish_indicator = "fish"
+zsh_indicator = "zsh"
+powershell_indicator = "powershell"
+pwsh_indicator = "psh"
+ion_indicator = "ion"
+elvish_indicator = "elvish"
+tcsh_indicator = "tcsh"
+xonsh_indicator = "xonsh"
+cmd_indicator = "cmd"
+nu_indicator = "nu"
+unknown_indicator = ""
+style = "fg:color_shell"
+
+[container]
+style = "fg:color_container"
+format = '[ $symbol $name ]($style)'
+
+[jobs]
+symbol = "󰒋"
+style = "fg:color_other"
+format = '[ $symbol( $number) ]($style)'
+symbol_threshold = 1
+number_threshold = 1
+
+[custom.memory_usage]
+command = "starship module memory_usage"
+when = '[ "${STARSHIP_COCKPIT_MEMORY_USAGE_ENABLED:-false}" = "true" ]'
+format = "( $output )"
+disabled = false
+
+[memory_usage]
+threshold = 0
+symbol = "󰓅"
+style = "fg:color_other"
+format = '( [$symbol( ${ram})]($style) )'
+disabled = false
+
+[custom.battery]
+command = """
+battery_info=$(starship module battery)
+if [ -n "$battery_info" ]; then
+    percent=$(echo "$battery_info" | grep -o '[0-9]*%%' | sed 's/%%//')
+    if [ "$percent" -le "${STARSHIP_COCKPIT_BATTERY_THRESHOLD:-0}" ]; then
+        echo "$battery_info" | sed 's/%%/%/'
+    fi
+fi
+"""
+when = '[ "${STARSHIP_COCKPIT_BATTERY_ENABLED:-false}" = "true" ]'
+format = "( $output )"
+disabled = false
+
+[battery]
+full_symbol = "󰁹"
+charging_symbol = "󰂄"
+discharging_symbol = "󰂃"
+unknown_symbol = "󰂑"
+empty_symbol = "󰂎"
+format = '( [$symbol( $percentage)]($style) )'
+disabled = false
+
+[[battery.display]]
+threshold = 10
+style = "bold fg:color_danger"
+
+[[battery.display]]
+threshold = 20
+style = "fg:color_caution"
+
+[[battery.display]]
+threshold = 100
+style = "fg:color_other"
+
+[time]
+disabled = false
+time_format = "%R"
+style = "fg:color_time"
+format = '[ 󰔛 $time ]($style)'
+
+[cmd_duration]
+min_time = 2000
+format = '[ 󱫑 $duration ]($style)'
+style = 'fg:color_duration'
+show_milliseconds = false
 disabled = false
 
 [status]
-symbol = ' '
 disabled = false
+format = '[( $symbol( $common_meaning)( $signal_name) )]($style)'
 map_symbol = true
-style = 'fg:blue'
+pipestatus = true
+symbol = '󰅙'
 success_symbol = ''
-format = '[$symbol](yellow)$status ($style)'
+not_executable_symbol = '󰂭'
+not_found_symbol = '󰍉'
+sigint_symbol = '󰐊'
+signal_symbol = '󱐋'
+style = 'bold fg:color_danger'
+recognize_signal_code = true
 
-[directory]
-style = "blue"
-home_symbol = "~"
-truncation_length = 0
-fish_style_pwd_dir_length = 1
-format = '[$path]($style)[$read_only]($read_only_style) '
+[line_break]
+disabled = false
 
 [character]
-error_symbol = "[❯](red)"
-vimcmd_symbol = "[❮](green)"
-success_symbol = "[[❯](green)](fg)"
-
-[git_branch]
-style = "white"
-symbol = ' '
-format = '[$symbol$branch(:$remote_branch)]($style) '
-
-[git_status]
-style = "white"
-up_to_date = ''
-renamed = '👅'
-conflicted = '🏳'
-behind = '😰 ${count}'
-stashed = " ${count} "
-staged = '[+$count](green) '
-deleted = '󰗨 ${count}(red) '
-ahead = '[⇡${count}](lavender) '
-modified = '[ ${count}](lavender) '
-untracked = "[ ${count}](sapphire) "
-diverged = '⇕⇡${ahead_count}⇣${behind_count} '
-format = "[[($conflicted$modified$staged$renamed$deleted)](218)($ahead_behind$stashed)]($style)"
-# format = "[[($conflicted$untracked$modified$staged$renamed$deleted)](218)($ahead_behind$stashed)]($style)"
-
-[git_state]
-style = "fg"
-cherry_pick = '[🍒PICK](red)'
-format = '\([$state( $progress_current/$progress_total)]($style)\) '
-
-[git_metrics]
 disabled = false
-only_nonzero_diffs = true
-format = '[+$added](green)[-$deleted](maroon) '
+success_symbol = '[❯](bold fg:color_ok)'
+error_symbol = '[❯](bold fg:color_danger)'
+vimcmd_symbol = '[❮](bold fg:color_vimcmd_ok)'
+vimcmd_replace_one_symbol = '[❮](bold fg:color_vimcmd_replace)'
+vimcmd_replace_symbol = '[❮](bold fg:color_vimcmd_replace)'
+vimcmd_visual_symbol = '[❮](bold fg:color_vimcmd_visual)'
 
-[cmd_duration]
+[custom.keyboard_layout]
+command = """
+
+# Set env variables if you want to use layout aliases (in uppercase)
+#     export STARSHIP_COCKPIT_KEYBOARD_LAYOUT_ABC=ENG
+#     export STARSHIP_COCKPIT_KEYBOARD_LAYOUT_UKRAINIAN=UKR
+#
+# Implementations:
+#     macOS
+
+if [ "$(uname -s)" = "Darwin" ]; then
+        input_source=$(defaults read ~/Library/Preferences/com.apple.HIToolbox.plist AppleCurrentKeyboardLayoutInputSourceID)
+        layout_id=$(echo "$input_source" | cut -d '.' -f4)
+        layout=$(printenv "STARSHIP_COCKPIT_KEYBOARD_LAYOUT_$(echo "$layout_id" | tr '[:lower:]' '[:upper:]')")
+        echo "$layout" || echo "$layout_id"
+fi
+
+"""
+symbol = "󰌌"
+style = "fg:color_other"
+format = '[( $symbol $output )]($style)'
+when = '[ "${STARSHIP_COCKPIT_KEYBOARD_LAYOUT_ENABLED:-false}" = "true" ]'
 disabled = false
-style = "yellow"
-min_time = 10_000
-min_time_to_notify = 1000
-show_notifications = false
-format = "[ ⏰ $duration]($style) "
 
-[dotnet]
-symbol = ' '
-disabled = false
-format = '[$symbol($version)]($style) '
-
-[deno]
-disabled = false
-symbol = '🦕'
-format = '[$symbol($version)]($style) '
-
-[nodejs]
-symbol = ' '
-style = "green"
-disabled = false
-format = '[$symbol($version)]($style) '
-detect_files = ['node_modules', '.yarn']
-# detect_extensions = ['js', 'mjs', 'cjs', 'ts', 'mts', 'cts', 'tsx']
-detect_extensions = []
-
-[custom.since_last_commit]
-style = "mauve"
-directories = [".git"]
-format = "[󰚰 $output]($style) "
-shell = ["bash", "--norc", "--noprofile"]
-description = "Show time since last commit"
-when = 'git rev-parse --is-inside-work-tree 2> /dev/null'
-command = """deno --allow-sys --allow-run --allow-read $HOME/dotfiles/bin/relative-time-commit"""
-
-[custom.git_host]
-style = "white"
-directories = [".git"]
-format = "[$output]($style) "
-shell = ["bash", "--norc", "--noprofile"]
-description = "Show icon of git host platform"
-when = 'git rev-parse --is-inside-work-tree 2> /dev/null'
-command = """deno --allow-sys --allow-run --allow-read $HOME/dotfiles/bin/github-icon"""
+[fill]
+symbol = " "
+style = ""
