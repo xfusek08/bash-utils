@@ -26,6 +26,19 @@ function wakapi-start() {
         docker rm wakapi
     fi
 
+    # Check for image updates
+    echo -e "${YELLOW}🔄 Checking for wakapi image updates...${NC}"
+    local IMAGE="ghcr.io/muety/wakapi:latest"
+    local PULL_OUTPUT=$(docker pull $IMAGE 2>&1)
+    
+    if [[ $PULL_OUTPUT == *"Image is up to date"* ]]; then
+        echo -e "${GREEN}✅ Image is already up to date${NC}"
+    elif [[ $PULL_OUTPUT == *"Downloaded newer image"* ]]; then
+        echo -e "${GREEN}✅ Downloaded newer image for wakapi${NC}"
+    else
+        echo -e "${GREEN}✅ Image pulled successfully${NC}"
+    fi
+
     echo -e "${YELLOW}🚀 Starting wakapi container...${NC}"
 
     # Run the container
@@ -35,7 +48,7 @@ function wakapi-start() {
         -e "WAKAPI_PASSWORD_SALT=$SALT" \
         -v ~/.wakapi:/data \
         --name wakapi \
-        ghcr.io/muety/wakapi:latest
+        $IMAGE
 
     # message that container is running successfully
     if [ "$(docker ps -q -f name=wakapi)" ]; then
