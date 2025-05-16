@@ -1,0 +1,2 @@
+
+alias run-bunner="$ZSH_BUNNER_RUN_COMMAND \"$ZSH_BUNNER_SCRIPTS_DIRECTORY\""
