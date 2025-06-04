@@ -1,8 +1,8 @@
 require_once "$ZSH_SCRIPTING_DIRECTORY/features/zinit.zsh"
 
 HISTFILE=~/.zsh_history
-HISTSIZE=5000
-SAVEHIST=5000
+HISTSIZE=15000
+SAVEHIST=15000
 HISTDUP=erase
 setopt appendhistory        # append history to the history file
 setopt sharehistory         # share history between sessions
