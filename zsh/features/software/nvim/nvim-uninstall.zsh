@@ -3,9 +3,19 @@ require_once "./nvim-backup.zsh"
 require_once "./nvim-utils.zsh"
 
 function nvim-uninstall() {
+    local original_pwd=$PWD
+    
     log -f "Starting neovim uninstallation process"
     
+    # prepare directories
+    # -------------------
+    local nvim_install_dir="$HOME/.nvim"
+    
+    # Move to a safe directory before operations
+    cd "$HOME" || cd /tmp
+    
     # Backup current configuration before uninstalling
+    # ------------------------------------------------
     if nvim-directories-exist; then
         log -f "Backing up current neovim configuration before uninstall"
         if ! nvim-backup; then
@@ -17,23 +27,29 @@ function nvim-uninstall() {
         fi
     fi
     
-    # Remove neovim package
-    log -f "Removing neovim package"
-    sudo apt-get purge -y neovim
-    if [ $? -eq 0 ]; then
-        log -f "Neovim package removed successfully"
-    else
-        log -e "Failed to remove neovim package"
-        return 1
+    # Remove neovim installation directory
+    # -----------------------------------
+    if [ -d "$nvim_install_dir" ]; then
+        log -f "Removing neovim installation directory"
+        rm -rf "$nvim_install_dir"
+        log -f "Neovim installation directory removed successfully"
     fi
     
-    # Clean up any remaining dependencies
-    sudo apt-get autoremove -y
+    # Remove symbolic link
+    # -------------------
+    if [ -L "$HOME/.local/bin/nvim" ]; then
+        log -f "Removing neovim executable link"
+        rm -f "$HOME/.local/bin/nvim"
+    fi
     
     # Remove neovim configuration directories
+    # --------------------------------------
     remove_nvim_directories
     
     log -f "Neovim uninstallation completed"
+    
+    # Return to original directory if it still exists
+    cd "$original_pwd" 2>/dev/null || cd "$HOME"
     
     return 0
 }

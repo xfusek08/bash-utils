@@ -1,5 +1,6 @@
 require_once '../../utils/ensure_directory.zsh'
-require_once '../jq.zsh'
+require_once '../../utils/get_github_release_asset_url.zsh'
+require_once '../../utils/download_and_extract.zsh'
 
 function youtube-music-install() {
     local original_pwd=$PWD
@@ -43,64 +44,47 @@ function youtube-music-install() {
         local zipball_url=$1
         local target_directory=$2
         echo "Downloading YouTube Music source code from '$zipball_url'"
-        local temp_zip=$(mktemp "/tmp/youtube-music-source.XXXXXX.zip")
-        wget -O "$temp_zip" "$zipball_url"
-        if [[ $? -ne 0 ]]; then
-            echo "Failed to download source code"
-            rm -f "$temp_zip"
-            return 1
-        fi
-        echo "Extracting source code to '$target_directory'"
-        local temp_extract=$(mktemp -d "/tmp/youtube-music-extract.XXXXXX")
-        unzip -q "$temp_zip" -d "$temp_extract"
-        # Find the root folder (should be the only directory)
-        local extracted_dir=$(find "$temp_extract" -maxdepth 1 -type d -not -path "$temp_extract" | head -n 1)
-        if [[ -n "$extracted_dir" && -d "$extracted_dir" ]]; then
-            # Move contents from the extracted root folder to target directory
-            mv "$extracted_dir"/* "$target_directory/" 2>/dev/null
-            # Also move hidden files if any
-            mv "$extracted_dir"/.* "$target_directory/" 2>/dev/null || true
-        fi
-        rm -rf "$temp_extract"
-        rm -f "$temp_zip"
+        download_and_extract "$zipball_url" "$target_directory" "zip"
     }
     
     # Download latest YouTube Music release info
     # ------------------------------------------
     
     echo "Checking for latest YouTube Music release"
-    local temp_json=$(mktemp "/tmp/youtube-music-release.XXXXXX.json")
-    curl -s https://api.github.com/repos/th-ch/youtube-music/releases/latest > "$temp_json"
-    
-    if [[ $? -ne 0 ]] || [[ ! -s "$temp_json" ]]; then
-        echo "Failed to fetch release information"
-        rm -f "$temp_json"
+    local appimage_url=$(get_github_release_asset_url "th-ch/youtube-music" "YouTube-Music-.*\\.AppImage$")
+    if [[ -z "$appimage_url" ]]; then
+        echo "Failed to find AppImage download URL"
         return 1
     fi
     
-    # Extract AppImage URL
-    local appimage_url=$(cat "$temp_json" | jq -r '.assets[] | select(.name | test("YouTube-Music-.*\\.AppImage$") and (test("arm") | not)) | .browser_download_url')
+    # Filter out ARM versions if multiple matches
+    if [[ "$appimage_url" == *"arm"* ]]; then
+        echo "Found ARM version, looking for x86_64 version"
+        appimage_url=$(get_github_release_asset_url "th-ch/youtube-music" "YouTube-Music-.*(?!.*arm).*\\.AppImage$")
+        
+        if [[ -z "$appimage_url" ]]; then
+            echo "Failed to find non-ARM AppImage download URL"
+            return 1
+        fi
+    fi
+    
     echo ""
     echo "Downloading YouTube Music from: $appimage_url"
     echo ""
     
-    if [[ -z "$appimage_url" || "$appimage_url" == "null" ]]; then
-        echo "Failed to find AppImage download URL"
-        rm -f "$temp_json"
-        return 1
-    fi
-    
-    # Extract source code URL
+    # Extract source code URL - zipball is just another asset
+    local temp_json=$(mktemp "/tmp/youtube-music-release.XXXXXX.json")
+    curl -s https://api.github.com/repos/th-ch/youtube-music/releases/latest > "$temp_json"
     local zipball_url=$(cat "$temp_json" | jq -r '.zipball_url')
-    echo "Source code URL: $zipball_url"
-    echo ""
-    
     rm -f "$temp_json"
     
     if [[ -z "$zipball_url" || "$zipball_url" == "null" ]]; then
         echo "Failed to find source code download URL"
         return 1
     fi
+    
+    echo "Source code URL: $zipball_url"
+    echo ""
     
     # Clear existing installations
     # ---------------------------

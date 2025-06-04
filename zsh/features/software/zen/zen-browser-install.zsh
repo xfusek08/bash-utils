@@ -1,5 +1,6 @@
 require_once '../../utils/ensure_directory.zsh'
-require_once '../jq.zsh'
+require_once '../../utils/get_github_release_asset_url.zsh'
+require_once '../../utils/download_and_extract.zsh'
 
 function zen-browser-install() {
     local original_pwd=$PWD
@@ -21,7 +22,7 @@ function zen-browser-install() {
         local tarball_url=$1
         local target_directory=$2
         echo "Installing Zen tarball '$tarball_url' into '$target_directory'"
-        tar -xJf "$temp_tarball" -C "$target_directory"
+        download_and_extract "$tarball_url" "$target_directory"
     }
     
     local clear_install_directory() {
@@ -44,14 +45,13 @@ function zen-browser-install() {
     # -----------------------------------
     
     echo "Checking for latest Zen release"
-    local tarball_url=$(curl -s https://api.github.com/repos/zen-browser/desktop/releases/latest | jq -r '.assets[] | select(.name=="zen.linux-x86_64.tar.xz") | .browser_download_url')
-    echo "Downloading Zen from: $tarball_url"
-    local temp_tarball=$(mktemp "/tmp/zen.XXXXXX.tar.xz")
-    wget -O "$temp_tarball" "$tarball_url"
-    if [[ $? -ne 0 ]]; then
-        echo "Failed to download Zen tarball"
+    local tarball_url=$(get_github_release_asset_url "zen-browser/desktop" "^zen\\.linux-x86_64\\.tar\\.xz$")
+    if [[ -z "$tarball_url" ]]; then
+        echo "Failed to find Zen tarball download URL"
         return 1
     fi
+    
+    echo "Downloading Zen from: $tarball_url"
     
     # Create backup of existing zen installation
     # ------------------------------------------
@@ -62,11 +62,14 @@ function zen-browser-install() {
         clear_install_directory
     fi
     
-    # Unpacking the downloaded tarball
-    # ---------------------------------
+    # Download and extract tarball
+    # ---------------------------
     
-    echo "Extracting Zen tarball"
-    install_tarball "$temp_tarball" "$main_directory"
+    echo "Downloading and extracting Zen tarball"
+    if ! download_and_extract "$tarball_url" "$main_directory"; then
+        echo "Failed to download and extract Zen tarball"
+        return 1
+    fi
     
     # Cleanup temporary tarball
     # -------------------------
