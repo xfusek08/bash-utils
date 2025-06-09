@@ -1,4 +1,3 @@
-
 function wakapi-start() {
     local wakapi_dir="$HOME/.wakapi"
     local expected_repo="git@github.com:xfusek08/wakapi-self-hosted.git"
@@ -7,7 +6,7 @@ function wakapi-start() {
     # Check if directory exists
     if [[ ! -d "$wakapi_dir" ]]; then
         echo "Directory ~/.wakapi does not exist, cloning repository..."
-        git clone "$expected_repo" "$wakapi_dir"
+        git clone  "$expected_repo" "$wakapi_dir" --recursive
         if [[ $? -ne 0 ]]; then
             echo "Error: Failed to clone wakapi repository"
             return 1
@@ -16,7 +15,7 @@ function wakapi-start() {
         # Directory exists but is empty
         echo "Directory ~/.wakapi is empty, removing and cloning repository..."
         rmdir "$wakapi_dir"
-        git clone "$expected_repo" "$wakapi_dir"
+        git clone "$expected_repo" "$wakapi_dir" --recursive
         if [[ $? -ne 0 ]]; then
             echo "Error: Failed to clone wakapi repository"
             return 1
