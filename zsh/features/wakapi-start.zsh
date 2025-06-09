@@ -1,59 +1,50 @@
-# https://github.com/muety/wakapi
-
-# Define colors
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
 
 function wakapi-start() {
-    # Create wakapi directory if it doesn't exist
-    mkdir -p ~/.wakapi
-
-    # Define salt file path
-    SALT_FILE=~/.wakapi/salt
-    # Generate or read salt
-    if [ ! -f "$SALT_FILE" ]; then
-        echo -e "${YELLOW}🔑 Generating new salt...${NC}"
-        cat /dev/urandom | LC_ALL=C tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1 >"$SALT_FILE"
-    fi
-    SALT=$(cat "$SALT_FILE")
-
-    # if container exists, stop and remove it
-    if [ "$(docker ps -aq -f name=wakapi)" ]; then
-        echo -e "${YELLOW}🛑 Stopping existing wakapi container...${NC}"
-        docker stop wakapi
-        echo -e "${YELLOW}🗑️ Removing existing wakapi container...${NC}"
-        docker rm wakapi
-    fi
-
-    # Check for image updates
-    echo -e "${YELLOW}🔄 Checking for wakapi image updates...${NC}"
-    local IMAGE="ghcr.io/muety/wakapi:latest"
-    local PULL_OUTPUT=$(docker pull $IMAGE 2>&1)
+    local wakapi_dir="$HOME/.wakapi"
+    local expected_repo="git@github.com:xfusek08/wakapi-self-hosted.git"
+    local start_script="$wakapi_dir/wakapi-start.zsh"
     
-    if [[ $PULL_OUTPUT == *"Image is up to date"* ]]; then
-        echo -e "${GREEN}✅ Image is already up to date${NC}"
-    elif [[ $PULL_OUTPUT == *"Downloaded newer image"* ]]; then
-        echo -e "${GREEN}✅ Downloaded newer image for wakapi${NC}"
+    # Check if directory exists
+    if [[ ! -d "$wakapi_dir" ]]; then
+        echo "Directory ~/.wakapi does not exist, cloning repository..."
+        git clone "$expected_repo" "$wakapi_dir"
+        if [[ $? -ne 0 ]]; then
+            echo "Error: Failed to clone wakapi repository"
+            return 1
+        fi
+    elif [[ -z "$(ls -A "$wakapi_dir" 2>/dev/null)" ]]; then
+        # Directory exists but is empty
+        echo "Directory ~/.wakapi is empty, removing and cloning repository..."
+        rmdir "$wakapi_dir"
+        git clone "$expected_repo" "$wakapi_dir"
+        if [[ $? -ne 0 ]]; then
+            echo "Error: Failed to clone wakapi repository"
+            return 1
+        fi
     else
-        echo -e "${GREEN}✅ Image pulled successfully${NC}"
+        # Directory exists and is not empty, check if it's the correct git repo
+        if [[ ! -d "$wakapi_dir/.git" ]]; then
+            echo "Error: ~/.wakapi exists but is not a git repository"
+            echo "Please remove or backup the contents of ~/.wakapi and try again"
+            return 1
+        fi
+        
+        # Check if it has the correct remote origin
+        local current_origin=$(cd "$wakapi_dir" && git remote get-url origin 2>/dev/null)
+        if [[ "$current_origin" != "$expected_repo" ]]; then
+            echo "Error: ~/.wakapi is a git repository but not connected to the correct origin"
+            echo "Expected: $expected_repo"
+            echo "Current:  $current_origin"
+            echo "Please remove or backup the contents of ~/.wakapi and try again"
+            return 1
+        fi
     fi
-
-    echo -e "${YELLOW}🚀 Starting wakapi container...${NC}"
-
-    # Run the container
-    docker run -d \
-        --restart unless-stopped \
-        -p 3100:3000 \
-        -e "WAKAPI_PASSWORD_SALT=$SALT" \
-        -v ~/.wakapi:/data \
-        --name wakapi \
-        $IMAGE
-
-    # message that container is running successfully
-    if [ "$(docker ps -q -f name=wakapi)" ]; then
-        echo -e "${GREEN}✅ Wakapi is running successfully on port: 3100!${NC}"
+    
+    # Execute the wakapi start script
+    if [[ -f "$start_script" ]]; then
+        "$start_script"
     else
-        echo -e "\033[0;31m❌ Wakapi failed to start.${NC}"
+        echo "Error: wakapi-start.zsh not found in ~/.wakapi"
+        return 1
     fi
 }
