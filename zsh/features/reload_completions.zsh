@@ -1,5 +1,5 @@
 
-require_once "reload.zsh"
+require_once "zsh/zsh-reload.zsh"
 
 function reload_completions() {
     # Check if ZSH_COMPLETIONS_DIRECTORY is set and exists
@@ -35,5 +35,5 @@ function reload_completions() {
     
     echo "Completion files reloaded."
     
-    reload-zsh
+    zsh-reload
 }
