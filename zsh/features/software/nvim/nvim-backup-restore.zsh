@@ -1,5 +1,4 @@
 require_once "$LIB_PATH/log.zsh"
-require_once "../../utils/ensure_zsh_backup_dir.zsh"
 require_once "../../utils/ensure_directory.zsh"
 require_once "./nvim-backup.zsh"
 require_once "./nvim-utils.zsh"

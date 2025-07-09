@@ -1,6 +1,5 @@
 require_once "$LIB_PATH/log.zsh"
 require_once '../../utils/ensure_directory.zsh'
-require_once "../../utils/ensure_zsh_backup_dir.zsh"
 require_once "./nvim-utils.zsh"
 
 
@@ -13,7 +12,7 @@ function nvim-backup() {
         shift
     fi
     
-    ensure_zsh_backup_dir
+    ensure_directory "$ZSH_BACKUP_DIR"
     if [ $? -ne 0 ]; then
         log -e "Failed to create backup directory"
         return 1

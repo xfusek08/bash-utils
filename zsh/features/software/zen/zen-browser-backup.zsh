@@ -1,18 +1,195 @@
 require_once "$LIB_PATH/log.zsh"
-require_once  "../../utils/ensure_zsh_backup_dir.zsh"
+require_once '../../utils/ensure_directory.zsh'
 
-# Helper function for creating backup
-function _zen_browser_backup_create() {
-    local output_file="$1"
+function _parse_arguments() {
+    log -f "Parsing arguments"
+    local prefix=$1
+    
+    shift  # Remove the prefix argument
+    
+    local _restore=false
+    local _backup_all=false
+    local _custom_backup_dir=""
+    local _custom_backup_name=""
+    local _use_timestamp=false
+    local _restore_file=""
+    
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -r|--restore)
+                _restore=true
+                shift
+                # Check if next argument exists and isn't an option
+                if [[ $# -gt 0 && ! "$1" =~ ^- ]]; then
+                    _restore_file="$1"
+                    shift
+                fi
+                ;;
+            -a|--all)
+                _backup_all=true
+                shift
+                ;;
+            -f|--file-dir)
+                shift
+                if [[ $# -gt 0 && "$1" != -* ]]; then
+                    _custom_backup_dir="$1"
+                    shift
+                else
+                    log -e "Error: -f|--file-dir option requires a directory path argument"
+                    return 1
+                fi
+                ;;
+            -n|--name)
+                shift
+                if [[ $# -gt 0 && "$1" != -* ]]; then
+                    _custom_backup_name="$1"
+                    shift
+                else
+                    log -e "Error: -n|--name option requires a name argument"
+                    return 1
+                fi
+                ;;
+            -t|--timestamp)
+                _use_timestamp=true
+                shift
+                ;;
+            *)
+                # Skip unrecognized options
+                shift
+                ;;
+        esac
+    done
+    
+    # Set the variables using the prefix
+    eval "${prefix}_restore=$_restore"
+    eval "${prefix}_backup_all=$_backup_all"
+    eval "${prefix}_custom_backup_dir=$_custom_backup_dir"
+    eval "${prefix}_custom_backup_name=$_custom_backup_name"
+    eval "${prefix}_use_timestamp=$_use_timestamp"
+    eval "${prefix}_restore_file=$_restore_file"
+    
+    return 0
+}
+
+# Setup backup variables
+function _setup_backup_variables() {
+    log -f "Setting up variables"
+    local backup_all="$1"
+    local custom_backup_dir="$2"
+    local custom_backup_name="$3"
+    local use_timestamp="$4"
+    local prefix="$5"
+    
+    local backup_suffix=""
+    [[ "$backup_all" == true ]] && backup_suffix="-complete"
+    local backup_base_name="zen-browser-backup"
+    
+    # Use custom backup name if provided
+    [[ -n "$custom_backup_name" ]] && backup_base_name="$custom_backup_name"
+    
+    # Add timestamp if requested
+    if [[ "$use_timestamp" == true ]]; then
+        local timestamp=$(date "+%Y:%m:%d:%H:%M:%S")
+        backup_suffix="${backup_suffix}-${timestamp}"
+    fi
+    
+    # Set backup directory
+    local _backup_dir="${custom_backup_dir:-$ZSH_BACKUP_DIR}"
+    ensure_directory "$_backup_dir"
+    if [ $? -ne 0 ]; then
+        log -e "Failed to ensure backup directory exists: $_backup_dir"
+        return 1
+    fi
+    
+    local _backup_file_name="$_backup_dir/${backup_base_name}${backup_suffix}.zip"
+    
+    # Set the variables using the prefix
+    eval "${prefix}_backup_file_name=$_backup_file_name"
+    eval "${prefix}_backup_dir=$_backup_dir"
+    
+    return 0
+}
+
+# List available backups in a directory
+function _list_available_backups() {
+    local backup_dir="$1"
+    
+    log -f "Available backups in $backup_dir:"
+    
+    # Check if backup directory exists
+    if [[ ! -d "$backup_dir" ]]; then
+        log -e "Backup directory $backup_dir does not exist"
+        return 1
+    fi
+    
+    # List all zip files in the backup directory
+    local backup_files=($(find "$backup_dir" -name "*.zip" -type f 2>/dev/null))
+    
+    if [[ ${#backup_files[@]} -eq 0 ]]; then
+        log -e "No backup files found in $backup_dir"
+        return 1
+    fi
+    
+    log -f "Found ${#backup_files[@]} backup files:"
+    for file in "${backup_files[@]}"; do
+        echo "  $(basename "$file")"
+    done
+    
+    log -e "Please specify a backup file to restore using: zen-browser-backup -r /path/to/backup.zip"
+    return 1
+}
+
+# Handle the restore operation
+function _handle_restore_operation() {
+    local backup_file_name="$1"
+    local backup_dir="$2"
+    local target_dir="$3"
+    
+    log -f "Restore mode: checking for backup"
+    
+    # Check if backup exists
+    if [[ ! -f "$backup_file_name" ]]; then
+        log -e "No backup file found at $backup_file_name, cannot restore."
+        _list_available_backups "$backup_dir"
+        return 1
+    fi
+    
+    log -f "Restoring zen browser from $backup_file_name to $target_dir"
+    
+    # Restore the backup
+    ensure_directory "$target_dir"
+    if [ $? -ne 0 ]; then
+        log -e "Failed to ensure target directory exists: $target_dir"
+        return 1
+    fi
+    
+    # Extract the backup to the target directory
+    log -f "Extracting backup archive to $target_dir"
+    unzip -q "$backup_file_name" -d "$target_dir"
+    if [ $? -ne 0 ]; then
+        log -e "Failed to restore zen browser from \"$backup_file_name\""
+        return 1
+    fi
+    
+    log -f "Restore completed"
+    echo "$backup_file_name"
+    return 0
+}
+
+# Handle the backup operation
+function _handle_backup_operation() {
+    local backup_file_name="$1"
     local backup_all="$2"
-    local main_directory="$3"
+    local target_directory="$3"
+    
+    log -f "Starting backup operation"
     
     # Save original directory before changing it
     local original_dir="$(pwd)"
     # from here on we will work in main_directory
-    cd "$main_directory" || { log -e "Failed to change directory to $main_directory"; return 1; }
+    cd "$target_directory" || { log -e "Failed to change directory to $target_directory"; return 1; }
     
-    local temp_backup_file="/tmp/$(basename "$output_file")"
+    local temp_backup_file="/tmp/$(basename "$backup_file_name")"
     log -f "Backing up zen browser from $(pwd) to $temp_backup_file"
     
     # Create backup archive
@@ -28,154 +205,59 @@ function _zen_browser_backup_create() {
     
     if [ $? -ne 0 ]; then
         cd "$original_dir"
-        log -e "Failed to backup zen browser"
         [ -f "$temp_backup_file" ] && rm "$temp_backup_file"
+        log -e "Failed to backup zen browser"
         return 1
     fi
     
     # Finalize backup file
-    log -f "Moving temporary backup file to final location: $temp_backup_file -> $output_file"
-    [ -f "$output_file" ] && rm "$output_file"
-    mv "$temp_backup_file" "$output_file"
+    log -f "Moving temporary backup file to final location: $temp_backup_file -> $backup_file_name"
+    [ -f "$backup_file_name" ] && rm "$backup_file_name"
+    mv "$temp_backup_file" "$backup_file_name"
     
     # Restore original directory
     cd "$original_dir"
-    return 0
-}
-
-# Helper function for restoring backup
-function _zen_browser_backup_restore() {
-    local input_file="$1"
-    local is_complete_backup="$2"
-    local target_dir="$3"
-    
-    ensure_directory "$target_dir"
-    
-    # For complete backups, clean everything first
-    if [[ "$is_complete_backup" == true ]]; then
-        log -f "Complete backup detected - removing all files in target directory before restore"
-        rm -rf "${target_dir:?}"/* 2>/dev/null
-    else
-        log -f "Regular backup detected - existing excluded files will be preserved"
-    fi
-    
-    # Extract the backup to the target directory
-    log -f "Extracting backup archive to $target_dir"
-    unzip -q "$input_file" -d "$target_dir"
-    if [ $? -ne 0 ]; then
-        log -e "Failed to restore zen browser"
-        return 1
-    fi
-    
-    return 0
-}
-
-function zen-browser-backup() {
-    # Parse arguments
-    # --------------
-    log -f "Parsing arguments"
-    local restore=false
-    local backup_all=false
-    local custom_backup_dir=""
-    
-    while [[ $# -gt 0 ]]; do
-        case "$1" in
-            -r|--restore)
-                restore=true
-                shift
-                ;;
-            -a|--all)
-                backup_all=true
-                shift
-                ;;
-            -f|--file-dir)
-                if [[ -n "$2" && "$2" != -* ]]; then
-                    custom_backup_dir="$2"
-                    shift 2
-                else
-                    log -e "Error: -f|--file-dir option requires a directory path argument"
-                    return 1
-                fi
-                ;;
-            *)
-                shift
-                ;;
-        esac
-    done
-    
-    # Setup variables
-    # --------------
-    log -f "Setting up variables"
-    local backup_suffix=""
-    [[ "$backup_all" == true ]] && backup_suffix="-complete"
-    local backup_file_name=""
-    
-    # Set backup file location based on whether a custom directory was provided
-    if [[ -n "$custom_backup_dir" ]]; then
-        # Ensure custom backup directory exists
-        if [[ ! -d "$custom_backup_dir" ]]; then
-            log -f "Creating custom backup directory: $custom_backup_dir"
-            mkdir -p "$custom_backup_dir" || {
-                log -e "Failed to create custom backup directory: $custom_backup_dir"
-                return 1
-            }
-        fi
-        backup_file_name="$custom_backup_dir/zen-browser-backup${backup_suffix}.zip"
-    else
-        # Use default backup directory
-        backup_file_name="$ZSH_BACKUP_DIR/zen-browser-backup${backup_suffix}.zip"
-    fi
-    
-    local main_directory="$HOME/.zen"
-    
-    # Handle restore operation
-    # -----------------------
-    if [[ "$restore" == true ]]; then
-        log -f "Restore mode: checking for backup"
-        # Check if backup exists
-        if [[ ! -f "$backup_file_name" ]]; then
-            log -e "No backup file found at $backup_file_name, cannot restore"
-            return 1
-        fi
-        
-        log -f "Restoring zen browser from $backup_file_name to $main_directory"
-        
-        # Determine if this is a complete backup from filename
-        local is_complete_backup=false
-        [[ "$backup_file_name" == *"-complete.zip" ]] && is_complete_backup=true
-        
-        # Restore the backup
-        _zen_browser_backup_restore "$backup_file_name" "$is_complete_backup" "$main_directory"
-        if [ $? -ne 0 ]; then
-            log -e "Backup restore failed"
-            return 1
-        fi
-        
-        log -f "Restore completed"
-        return 0
-    fi
-    
-    # Proceed with backup operation
-    # ----------------------------
-    log -f "Starting backup operation"
-    
-    # Only ensure default backup directory if we're using it
-    if [[ -z "$custom_backup_dir" ]]; then
-        log -f "Ensuring default backup directory exists"
-        ensure_zsh_backup_dir
-        if [ $? -ne 0 ]; then
-            log -e "Failed to create backup directory"
-            return 1
-        fi
-    fi
-    
-    # Create the backup
-    _zen_browser_backup_create "$backup_file_name" "$backup_all" "$main_directory"
-    if [ $? -ne 0 ]; then
-        log -e "Backup creation failed"
-        return 1
-    fi
     
     log -f "Backup completed"
+    echo "$backup_file_name"
     return 0
+}
+
+# Main function
+function zen-browser-backup() {
+    # Variables for command line options
+    local opts_restore=false
+    local opts_backup_all=false
+    local opts_custom_backup_dir=""
+    local opts_custom_backup_name=""
+    local opts_use_timestamp=false
+    local opts_restore_file=""
+    
+    # Parse arguments
+    _parse_arguments "opts" "$@"
+    if [ $? -ne 0 ]; then
+        return 1
+    fi
+    
+    # Variables for backup paths
+    local backup_backup_file_name=""
+    local backup_backup_dir=""
+    
+    # Setup backup variables
+    _setup_backup_variables "$opts_backup_all" "$opts_custom_backup_dir" "$opts_custom_backup_name" "$opts_use_timestamp" "backup"
+    if [ $? -ne 0 ]; then
+        return 1
+    fi
+    
+    # Set the main zen directory
+    local main_directory="$HOME/.zen"
+    
+    # Handle restore or backup operation
+    if [[ "$opts_restore" == true ]]; then
+        _handle_restore_operation "$opts_restore_file" "$backup_backup_dir" "$main_directory"
+        return $?
+    else
+        _handle_backup_operation "$backup_backup_file_name" "$opts_backup_all" "$main_directory"
+        return $?
+    fi
 }

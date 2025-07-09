@@ -29,11 +29,12 @@ function zen-browser-install() {
     log -f "Create backup of existing zen installation in: $install_directory"
     if [[ -n $(ls -A "$install_directory" 2>/dev/null) ]]; then
         log -f "Backing up existing Zen installation"
-        zen-browser-backup  # No arguments means perform backup
+        local backup_file=$(zen-browser-backup -t -n "zen-browser-backup-before-installation")
         if [ $? -ne 0 ]; then
             log -f "Backup failed, aborting installation"
             return 1
         fi
+        log -f "Created backup at: $backup_file"
         log -f "Clearing install directory"
         rm -rf "$install_directory"
         ensure_directory "$install_directory"
@@ -55,7 +56,12 @@ function zen-browser-install() {
     if [[ -z $(ls -A "$install_directory" 2>/dev/null) ]]; then
         # There is content in install directory...
         log -f "Extraction failed, reverting installation"
-        zen-browser-backup -r  # -r flag means restore
+        local restored_file=$(zen-browser-backup -r)
+        if [ $? -eq 0 ]; then
+            log -f "Successfully restored from backup: $restored_file"
+        else
+            log -e "Failed to restore from backup"
+        fi
         return 1
     fi
     log -f "Extraction completed"
@@ -92,6 +98,71 @@ Categories=GNOME;GTK;Network;WebBrowser;
 MimeType=text/html;text/xml;application/xhtml+xml;application/rss+xml;application/rdf+xml;image/gif;image/jpeg;image/png;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ftp;x-scheme-handler/chrome;video/webm;application/x-xpinstall;
 StartupNotify=true
 EOF
+
+    # Install Sine
+    # ------------
+    log -f "Preparing to install Sine for Zen Browser"
+    
+    # Create backup before Sine installation
+    log -f "Creating backup before Sine installation"
+    local sine_backup_file=$(zen-browser-backup -t -n "zen-browser-backup-before-sine-installation")
+    if [ $? -ne 0 ]; then
+        log -f "Sine pre-installation backup failed, aborting Sine installation"
+        return 1
+    else
+        log -f "Created pre-Sine backup at: $sine_backup_file"
+    fi
+    
+    # Download Sine installer
+    log -f "Downloading Sine installer"
+    local temp_dir=$(mktemp -d)
+    local sine_installer_path="$temp_dir/sine-linux-x64"
+    local sine_url=$(get_github_release_asset_url "CosmoCreeper/Sine" "sine-linux-x64")
+    
+    if [[ -z "$sine_url" ]]; then
+        log -f "Failed to find Sine installer download URL, skipping Sine installation"
+    else
+        log -f "Found Sine installer URL: $sine_url"
+        log -f "Downloading Sine installer to $sine_installer_path"
+        
+        if curl -L -s "$sine_url" -o "$sine_installer_path"; then
+            log -f "Sine installer downloaded successfully"
+            
+            # Make installer executable
+            log -f "Making Sine installer executable"
+            chmod +x "$sine_installer_path"
+            
+            # Create a folder in main_directory for the last prompt
+            local sine_folder="$main_directory/sine_data"
+            ensure_directory "$sine_folder"
+            
+            # Run installer with automated inputs
+            log -f "Running Sine installer with automated inputs"
+            {
+                echo "2"
+                echo "1"
+                echo "$install_directory"
+                echo "asd"
+                echo "$main_directory"
+                echo "3" # 3 should be read by user from the profiles ini file.
+                echo "no"
+            } | "$sine_installer_path"
+            
+            local sine_exit_code=$?
+            if [ $sine_exit_code -eq 0 ]; then
+                log -f "Sine installation completed successfully"
+            else
+                log -f "Sine installation exited with code $sine_exit_code"
+            fi
+        else
+            log -f "Failed to download Sine installer"
+        fi
+        
+        # Clean up
+        log -f "Cleaning up Sine installer"
+        rm -f "$sine_installer_path"
+        rmdir "$temp_dir"
+    fi
 
     # Finalize installation
     # ---------------------

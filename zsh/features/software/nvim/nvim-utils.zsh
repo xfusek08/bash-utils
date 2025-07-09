@@ -1,5 +1,5 @@
 require_once "$LIB_PATH/log.zsh"
-require_once "../../utils/ensure_zsh_backup_dir.zsh"
+require_once '../../utils/ensure_directory.zsh'
 
 function nvim-directories-exist() {
     [ -d "$HOME/.config/nvim" ] || [ -d "$HOME/.local/share/nvim" ] || [ -d "$HOME/.local/state/nvim" ] || [ -d "$HOME/.cache/nvim" ]
@@ -7,7 +7,7 @@ function nvim-directories-exist() {
 
 
 function ensure_nvim_backup_file() {
-    ensure_zsh_backup_dir
+    ensure_directory "$ZSH_BACKUP_DIR"
     if [ $? -ne 0 ]; then
         log -e "Failed to access backup directory"
         return 1

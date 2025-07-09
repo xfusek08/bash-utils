@@ -1,3 +1,5 @@
+require_once "$LIB_PATH/log.zsh"
+
 function zen-browser-uninstall() {
     
     # prepare directories
@@ -8,37 +10,50 @@ function zen-browser-uninstall() {
     # Remove installation directory
     # ---------------------------
     if [ -d "$install_directory" ]; then
-        echo "Removing Zen installation directory"
+        log -f "Removing Zen installation directory"
         rm -rf "$install_directory"
     fi
     
     # Remove symbolic link
     # -------------------
     if [ -L "$HOME/.local/bin/zen" ]; then
-        echo "Removing Zen executable link"
+        log -f "Removing Zen executable link"
         rm -f "$HOME/.local/bin/zen"
     fi
     
     # Remove desktop entry
     # -------------------
     if [ -f "$HOME/.local/share/applications/zen.desktop" ]; then
-        echo "Removing Zen desktop entry"
+        log -f "Removing Zen desktop entry"
         rm -f "$HOME/.local/share/applications/zen.desktop"
     fi
     
     # Remove cache directory
     # ---------------------
     if [ -d "$HOME/.cache/zen" ]; then
-        echo "Removing Zen cache directory"
+        log -f "Removing Zen cache directory"
         rm -rf "$HOME/.cache/zen"
     fi
+    
+    # Clean up Sine related files
+    # --------------------------
+    log -f "Checking for Sine related files"
+    
+    # Check for Sine config in profile directory
+    local profile_dirs=("$main_directory/zen-browser/profile" "$main_directory/profile")
+    for profile_dir in "${profile_dirs[@]}"; do
+        if [ -d "$profile_dir/chrome/utils" ]; then
+            log -f "Removing Sine configuration from $profile_dir"
+            rm -rf "$profile_dir/chrome/utils"
+        fi
+    done
     
     # Clean up main directory if empty
     # ------------------------------
     if [ -d "$main_directory" ] && [ -z "$(ls -A "$main_directory")" ]; then
-        echo "Removing empty Zen configuration directory"
+        log -f "Removing empty Zen configuration directory"
         rm -rf "$main_directory"
     fi
     
-    echo "Zen uninstallation completed"
+    log -f "Zen uninstallation completed"
 }
