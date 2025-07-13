@@ -13,8 +13,11 @@ function display_loading_time() {
 
 # ZSH_DEBUG=true
 # ZSH_SCRIPTING_LOG_LEVEL=INFO
-ZSH_BACKUP_DIR="$HOME/DiskGoogle/Zalohy"
-ZSH_SCRIPTING_DIRECTORY=${ZSH_SCRIPTING_DIRECTORY:-"$HOME/sw/repo/personal/bash-utils/zsh"}
+
+ZSH_BACKUP_DIR="${ZSH_BACKUP_DIR:-$HOME/Backup}"
+[ ! -d "$ZSH_BACKUP_DIR" ] && mkdir -p "$ZSH_BACKUP_DIR"
+
+ZSH_SCRIPTING_DIRECTORY=${ZSH_SCRIPTING_DIRECTORY:-"$HOME/Repo/bash-utils/zsh"}
 ZSH_SCRIPTING_BOOTSTRAP="$ZSH_SCRIPTING_DIRECTORY/core/bootstrap.zsh"
 
 # if loader does not exist, create it
@@ -24,8 +27,12 @@ if [ -f "$ZSH_SCRIPTING_BOOTSTRAP" ]; then
     
     # Add completions directory to fpath
     fpath=("$ZSH_SCRIPTING_DIRECTORY/completions" $fpath)
-    run_loader
+    
+    # Initialize completion system BEFORE loading features
     autoload -Uz compinit
+    compinit
+    
+    run_loader
 fi
 
 # Display loading time at the end

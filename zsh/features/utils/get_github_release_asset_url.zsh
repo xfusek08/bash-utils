@@ -1,4 +1,3 @@
-require_once '../software/jq.zsh'
 
 # Function to get download URL for a specific asset from latest GitHub release
 # Usage: get_github_release_asset_url "owner/repo" "asset_name_pattern"

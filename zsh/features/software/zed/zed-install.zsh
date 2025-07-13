@@ -1,5 +1,4 @@
 require_once '../../utils/ensure_directory.zsh'
-require_once '../jq.zsh'
 
 function zed-install() {
     local original_pwd=$PWD

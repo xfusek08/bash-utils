@@ -73,12 +73,11 @@ function run_loader() {
     # if $ZSH_COMPILED_FEATURES_FILENAME file exists source it
     if [[ -f "$ZSH_COMPILED_FEATURES_FILENAME" ]]; then
         log "Loading completion from cache"
-        compinit -C
+        # Removed compinit call since it's now called in .zshrc
         log "Sourcing $ZSH_COMPILED_FEATURES_FILENAME"
         source "$ZSH_COMPILED_FEATURES_FILENAME"
     else
         source_and_compile_features
-        log "Compiling completions"
-        compinit -i
+        log "Completions already initialized"
     fi
 }
