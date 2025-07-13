@@ -14,7 +14,7 @@ function display_loading_time() {
 # ZSH_DEBUG=true
 # ZSH_SCRIPTING_LOG_LEVEL=INFO
 
-ZSH_BACKUP_DIR="${ZSH_BACKUP_DIR:-$HOME/Backup}"
+ZSH_BACKUP_DIR="${ZSH_BACKUP_DIR:-$HOME/GoogleDrive/Zalohy}"
 [ ! -d "$ZSH_BACKUP_DIR" ] && mkdir -p "$ZSH_BACKUP_DIR"
 
 ZSH_SCRIPTING_DIRECTORY=${ZSH_SCRIPTING_DIRECTORY:-"$HOME/Repo/bash-utils/zsh"}

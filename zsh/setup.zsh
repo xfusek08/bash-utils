@@ -29,20 +29,20 @@ else
     exit 1
 fi
 
-source ./setup/zsh-default.sh || error_exit "ZSH setup"
+# Dynamically source all setup scripts
+SETUP_DIR="./setup"
+if [[ -d "$SETUP_DIR" ]]; then
+    # Find all .sh files in the setup directory and sort them
+    for script in $(find "$SETUP_DIR" -name "*.sh" | sort); do
+        script_name=$(basename "$script" .sh)
+        echo "Running setup: $script_name"
+        require_once "$script" || error_exit "$script_name setup"
+    done
+else
+    error_exit "Setup directory not found: $SETUP_DIR"
+fi
 
-source ./setup/docker.sh || error_exit "Docker setup"
-
-source ./setup/rust-sdk.sh || error_exit "Rust SDK setup"
-
-source ./setup/starship.sh || error_exit "Starship setup"
-
-source ./setup/zoxide.sh || error_exit "Zoxide setup"
-
-source ./setup/eza.sh || error_exit "Eza setup"
-
-source ./setup/fzf.sh || error_exit "FZF setup"
-
+echo "Setup completed successfully!"
 source ./setup/bat.sh || error_exit "Bat setup"
 
 echo "Setup completed successfully!"

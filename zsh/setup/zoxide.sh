@@ -3,6 +3,7 @@
 set -e  # Exit on any command failure
 
 require_once "$LIB_PATH/log.zsh"
+require_once "setup/rust-sdk.sh"  # Add dependency on Rust SDK
 
 if command -v zoxide >/dev/null 2>&1; then
     log -f "zoxide is already installed. Skipping installation."
