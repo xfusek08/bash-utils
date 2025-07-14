@@ -25,6 +25,8 @@ if [ -f "$ZSH_SCRIPTING_BOOTSTRAP" ]; then
     source "$ZSH_SCRIPTING_BOOTSTRAP"
     $SCRIPTS_PATH/ensure_directory.zsh $1 "$ZSH_SCRIPTING_DIRECTORY/completions"
     
+    source "$ZSH_SCRIPTING_DIRECTORY/paths.zsh"
+    
     # Add completions directory to fpath
     fpath=("$ZSH_SCRIPTING_DIRECTORY/completions" $fpath)
     

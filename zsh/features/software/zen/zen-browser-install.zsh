@@ -74,9 +74,10 @@ function zen-browser-install() {
     # Register zen executable
     # -----------------------
     log -f "Registering Zen executable"
-    ensure_directory "$HOME/.local/bin"
-    [[ -L "$HOME/.local/bin/zen" ]] && rm -f "$HOME/.local/bin/zen"
-    ln -sf "$install_directory/zen" "$HOME/.local/bin/zen"
+    local local_bin_dir="$HOME/.local/bin"
+    ensure_directory "$local_bin_dir"
+    [[ -L "$local_bin_dir/zen" ]] && rm -f "$local_bin_dir/zen"
+    ln -sf "$install_directory/zen" "$local_bin_dir/zen"
     
     # Create desktop icon
     # -------------------
@@ -89,7 +90,7 @@ Name=Zen Browser
 Comment=Experience tranquillity while browsing the web without people tracking you!
 GenericName=Web Browser
 Keywords=Internet;WWW;Browser;Web;Explorer
-Exec=zen
+Exec=$local_bin_dir/zen
 Terminal=false
 X-MultipleArgs=false
 Type=Application
